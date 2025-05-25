@@ -10,9 +10,9 @@ public interface EventosRepository extends JpaRepository<Eventos, Long> {
 
     Eventos findById(long id);
 
-    List<Eventos> findByDescricaoContainingIgnoreCase(String descricao);
+    List<Eventos> findAllByDescricaoContaining(String descricao);
 
-    List<Eventos> findByOrganizacao(Organizacao organizacao);
+    List<Eventos> findAllByOrganizacao(Organizacao organizacao);
 
-    List<Eventos> findEventosByFaixaEtaria(Eventos.FaixaEtaria faixaEtaria);
+    List<Eventos> findAllByFaixaEtaria(Eventos.FaixaEtaria faixaEtaria);
 }
