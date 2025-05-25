@@ -10,6 +10,5 @@ import java.util.List;
 @Repository
 public interface OrganizacaoRepository extends JpaRepository<Organizacao, Long> {
 
-    List<Organizacao> findByNameContainingIgnoreCase(@NotBlank String name);
-
+    List<Organizacao> findAllByNameContaining(@NotBlank String name);
 }
