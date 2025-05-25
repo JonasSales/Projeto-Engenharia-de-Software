@@ -25,58 +25,12 @@ import java.util.UUID;
 @Table(name = "tb_user")
 public class ClientUser implements UserDetails {
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
-
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.active;
-    }
-
-    public enum Role {
-        ROLE_USER,
-        ROLE_ADMIN,
-        ROLE_ORGANIZATION
-    }
-
-    public ClientUser(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
-
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "UUID")
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @NotBlank
+    @NotBlank(message = "Precisa de um nome")
     private String name;
 
     @Email(message = "O Email tem de ser válido!!!")
@@ -99,9 +53,61 @@ public class ClientUser implements UserDetails {
 
     private String token;
 
+    @OneToMany(mappedBy = "clientUser", fetch = FetchType.LAZY)
+    private List<AvaliacoesEventos> avaliacoes;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "endereco_id", referencedColumnName = "id")
+    private Endereco endereco;
+
+    public ClientUser(String email, String password) {
+        this.email = email;
+        this.password = password;
+        this.active = true;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return active; }
+
     @PrePersist
     protected void onCreate() {
         this.created = LocalDateTime.now();
         this.modified = LocalDateTime.now();
     }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.modified = LocalDateTime.now();
+    }
+
+    public enum Role {
+        ROLE_USER,
+        ROLE_ADMIN,
+        ROLE_ORGANIZATION
+    }
 }
+

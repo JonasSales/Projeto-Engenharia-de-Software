@@ -247,7 +247,7 @@ public class MailService {
                                             <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 10px 31px;font-family:'Cabin',sans-serif;" align="left">
                 
                                               <div style="font-size: 14px; color: #e5eaf5; line-height: 140%; text-align: center; word-wrap: break-word;">
-                                                <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 28px; line-height: 39.2px;"><strong><span style="line-height: 39.2px; font-size: 28px;">Verifique o seu e-mail</span></strong>
+                                                <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 28px; line-height: 39.2px;"><strong><span style="line-height: 39.2px; font-size: 28px;">Verificação de e-mail</span></strong>
                                                   </span>
                                                 </p>
                                               </div>
@@ -291,7 +291,7 @@ public class MailService {
                 
                                               <div style="font-size: 14px; line-height: 160%; text-align: center; word-wrap: break-word;">
                                                 <p style="font-size: 14px; line-height: 160%;"><span style="font-size: 22px; line-height: 35.2px;">Olá [[NAME]], </span></p>
-                                                <p style="font-size: 14px; line-height: 160%;"><span style="font-size: 18px; line-height: 28.8px;">Você inicou a criação da sua conta mas falta um ultimo passo! Clique no botão abaixo e confirme o seu registro</span></p>
+                                                <p style="font-size: 14px; line-height: 160%;"><span style="font-size: 18px; line-height: 28.8px;">Você iniciou a criação da sua conta, mas falta um último passo! Clique no botão abaixo e confirme o seu registro.</span></p>
                                               </div>
                 
                                             </td>
@@ -308,7 +308,7 @@ public class MailService {
                                               <div align="center">
                                                 <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="[[URL]]" style="height:46px; v-text-anchor:middle; width:219px;" arcsize="8.5%"  stroke="f" fillcolor="#ff6600"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
                                                 <a href="[[URL]]" target="_blank" class="v-button" style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #ff6600; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
-                                                  <span style="display:block;padding:14px 44px 13px;line-height:120%;"><span style="font-size: 16px; line-height: 19.2px;"><strong><span style="line-height: 19.2px; font-size: 16px;">Verifique seu email</span></strong>
+                                                  <span style="display:block;padding:14px 44px 13px;line-height:120%;"><span style="font-size: 16px; line-height: 19.2px;"><strong><span style="line-height: 19.2px; font-size: 16px;">Verificar e-mail</span></strong>
                                                   </span>
                                                   </span>
                                                 </a>
