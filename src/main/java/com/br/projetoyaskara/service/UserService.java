@@ -39,6 +39,7 @@ public class UserService {
         user.setPassword(encodedPassword);
         user.setActive(false);
         user.setToken(GenerateRandonString.generateRandomString());
+
         ClientUserDTO clientUserDTO = new ClientUserDTO(userRepository.save(user));
 
         mailSender.sendVerificationEmail(user);
@@ -50,11 +51,9 @@ public class UserService {
         if (user == null || user.isEnabled()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Usuário já verificado");
         }
-
         user.setToken(null);
         user.setActive(true);
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.OK).body("Verificação realizada com sucesso");
-
     }
 }
