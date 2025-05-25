@@ -37,7 +37,7 @@ public class Eventos {
     @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY)
     private List<AvaliacoesEventos> avaliacoes;
 
-    @OneToOne(mappedBy = "evento", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "evento")
     private LotesIngresso lotesIngresso;
 
     @OneToOne(cascade = CascadeType.ALL)
