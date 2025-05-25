@@ -1,0 +1,37 @@
+@import url(/css/style.css);
+@import url(/css/top-bar.css);
+.section {
+  padding: 40px 0px 40px 0px;
+  width: 100vw;
+  height: 95vh;
+}
+
+.event {
+  text-align: center;
+}
+
+/* Espaço para o conteúdo não ficar escondido atrás da barra */
+.decorative-line {
+  position: relative;
+  margin: 0;
+  text-align: center; /* Centraliza o conteúdo dentro da div */
+}
+
+.decorative-line hr {
+  display: inline-block; /* Permite centralizar horizontalmente */
+  border: none;
+  border-top: 2px solid #bbb; /* cor da linha */
+  width: 300px;
+  margin: 0;
+}
+
+.center-block {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #6b1b8f; /* roxo */
+  width: 80px;
+  height: 12px;
+  border-radius: 6px;
+}

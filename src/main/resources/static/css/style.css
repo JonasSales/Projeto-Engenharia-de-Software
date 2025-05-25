@@ -1,0 +1,14 @@
+@import url(https://fonts.googleapis.com/css?family=Poppins);
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Poppins, sans-serif;
+  background: #fff;
+  color: #333;
+  overflow: hidden;
+}
