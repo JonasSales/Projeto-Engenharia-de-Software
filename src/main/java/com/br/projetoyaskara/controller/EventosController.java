@@ -23,6 +23,16 @@ public class EventosController {
         return eventosService.cadastrarEvento(eventos);
     }
 
+    @PostMapping("/update")
+    public ResponseEntity<?> atualizarEvento( @RequestBody Eventos eventos) {
+        return eventosService.atualizarEvento(eventos);
+    }
+
+    @PostMapping("/delete/{id}")
+    public ResponseEntity<?> deletarEvento(@PathVariable long id) {
+        return eventosService.deletarEvento(id);
+    }
+
     @GetMapping("/get")
     public ResponseEntity<?> getAllEventos() {
         return eventosService.listarEventos();
