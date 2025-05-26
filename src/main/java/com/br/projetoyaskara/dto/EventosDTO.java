@@ -21,7 +21,7 @@ public class EventosDTO {
         setDescricao(eventos.getDescricao());
         setDataInicio(eventos.getDataInicio());
         setDataFim(eventos.getDataFim());
-        //setEndereco(eventos.getEndereco());
+        setEndereco(new EnderecoDTO(eventos.getEndereco()));
         setFaixaEtaria(eventos.getFaixaEtaria());
         setStatus(eventos.getStatus());
 
