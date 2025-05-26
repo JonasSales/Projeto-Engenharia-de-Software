@@ -19,14 +19,14 @@ public class OrganizacaoDTO {
     public OrganizacaoDTO(Organizacao organizacao) {
         setId(organizacao.getId());
         setName(organizacao.getName());
-        setDescricao(organizacao.getDescription());
+        setDescription(organizacao.getDescription());
         setEndereco(new EnderecoDTO(organizacao.getEndereco()));
         setCnpj(organizacao.getCnpj());
     }
 
     private UUID id;
     private String name;
-    private String descricao;
+    private String description;
     private String cnpj;
     private EnderecoDTO endereco;
 
