@@ -7,12 +7,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/user")
@@ -34,8 +32,6 @@ public class UserController {
         return userService.verifyUser(code);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<?> test() {
-        return ResponseEntity.status(HttpStatus.OK).body("HELLO WORLD");
-    }
+    @GetMapping("/get/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable UUID id) {return userService.buscarUserPorId(id);}
 }

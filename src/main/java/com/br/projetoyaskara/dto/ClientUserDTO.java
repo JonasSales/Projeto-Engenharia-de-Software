@@ -22,7 +22,7 @@ public class ClientUserDTO {
         setRole(client.getRole().toString());
         setCreated(LocalDateTime.now());
         setModified(LocalDateTime.now());
-
+        setActive(isActive());
     }
 
     private UUID id;
@@ -37,5 +37,6 @@ public class ClientUserDTO {
 
     private LocalDateTime modified;
 
+    private boolean active;
 
 }

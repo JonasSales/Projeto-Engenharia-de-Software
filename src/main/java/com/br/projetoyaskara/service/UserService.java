@@ -2,6 +2,7 @@ package com.br.projetoyaskara.service;
 
 
 import com.br.projetoyaskara.dto.ClientUserDTO;
+import com.br.projetoyaskara.dto.EventosDTO;
 import com.br.projetoyaskara.model.ClientUser;
 import com.br.projetoyaskara.repository.UserRepository;
 import com.br.projetoyaskara.util.GenerateRandonString;
@@ -14,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -56,4 +59,9 @@ public class UserService {
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.OK).body("Verificação realizada com sucesso");
     }
+
+    public ResponseEntity<?> buscarUserPorId(UUID id) {
+        return ResponseEntity.ok().body(new ClientUserDTO(userRepository.findClientUserById(id)));
+    }
+
 }
