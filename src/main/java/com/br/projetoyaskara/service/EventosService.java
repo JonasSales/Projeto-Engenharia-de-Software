@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+import static com.br.projetoyaskara.util.Utils.atualizarEndereco;
+
 
 @Service
 public class EventosService {
@@ -30,12 +32,44 @@ public class EventosService {
         return new ResponseEntity<>(eventosRepository.save(eventos), HttpStatus.CREATED);
     }
 
+    public ResponseEntity<?> atualizarEvento(Eventos eventos) {
+        Eventos eventoAtualizado = eventosRepository.findEventosById(eventos.getId());
+        if (eventoAtualizado == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe evento com esse id: " + eventos.getId());
+        }
+
+        if (eventoAtualizado.getEndereco() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Endereço invalido");
+        }
+
+        eventoAtualizado.setId(eventos.getId());
+        eventoAtualizado.setDescricao(eventos.getDescricao());
+        eventoAtualizado.setDataInicio(eventos.getDataInicio());
+        eventoAtualizado.setDataFim(eventos.getDataFim());
+        eventoAtualizado.setFaixaEtaria(eventos.getFaixaEtaria());
+
+        atualizarEndereco(eventoAtualizado.getEndereco(), eventos.getEndereco());
+        eventosRepository.save(eventoAtualizado);
+        enderecoRepository.save(eventos.getEndereco());
+        return ResponseEntity.status(HttpStatus.OK).body(toDto(eventos));
+
+    }
+
     public ResponseEntity<?> listarEventos() {
         List<Eventos> eventos = eventosRepository.findAll();
         List<EventosDTO> dtos = eventos.stream()
                 .map(EventosDTO::new)
                 .toList();
         return ResponseEntity.ok(dtos);
+    }
+
+    public ResponseEntity<?> deletarEvento(long id) {
+        Eventos evento = eventosRepository.findEventosById(id);
+        if (evento == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe evento com esse id: " + id);
+        }
+        eventosRepository.delete(evento);
+        return ResponseEntity.status(HttpStatus.OK).body("Evento excluido com sucesso");
     }
 
     public ResponseEntity<?> buscarEventoPorId(long id) {
@@ -56,7 +90,6 @@ public class EventosService {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
-
 
     public ResponseEntity<?> buscarEventosPorDescricao(String descricao) {
         List<Eventos> eventos = eventosRepository.findAllByDescricaoContaining(descricao);
@@ -118,4 +151,7 @@ public class EventosService {
 
     }
 
+    private EventosDTO toDto(Eventos evento) {
+        return new EventosDTO(evento);
+    }
 }
