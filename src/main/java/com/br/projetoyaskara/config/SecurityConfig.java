@@ -33,7 +33,7 @@ public class SecurityConfig  {
         return httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests( authorize -> authorize
-                        .requestMatchers("/index.html", "/html/main-page.html", "html/login.html").permitAll()
+                        .requestMatchers("/index.html", "/html/main-page.html", "html/login.html", "html/register.html").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/user/create").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/verify").permitAll()
