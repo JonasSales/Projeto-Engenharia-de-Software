@@ -2,7 +2,6 @@ package com.br.projetoyaskara.service;
 
 
 import com.br.projetoyaskara.dto.ClientUserDTO;
-import com.br.projetoyaskara.dto.EventosDTO;
 import com.br.projetoyaskara.model.ClientUser;
 import com.br.projetoyaskara.repository.UserRepository;
 import com.br.projetoyaskara.util.GenerateRandonString;
@@ -15,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,20 +31,29 @@ public class UserService {
     }
 
     public ResponseEntity<?> RegisterUser(@Valid ClientUser user) throws MessagingException, UnsupportedEncodingException {
-        if (userRepository.findByEmail(user.getUsername()) != null) {
-            return  ResponseEntity.status(HttpStatus.CONFLICT).body("Usuário já cadastrado");
+        try {
+            if (userRepository.findByEmail(user.getUsername()) != null) {
+                return  ResponseEntity.status(HttpStatus.CONFLICT).body("Usuário já cadastrado");
+            }
+
+            if (user.getPassword().length() < 6) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Senha menor que 6 digitos");
+            }
+            String encodedPassword = passwordEncoder.encode(user.getPassword());
+
+            user.setPassword(encodedPassword);
+            user.setActive(false);
+            user.setToken(GenerateRandonString.generateRandomString());
+
+            ClientUserDTO clientUserDTO = new ClientUserDTO(userRepository.save(user));
+
+            mailSender.sendVerificationEmail(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(clientUserDTO);
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
 
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-
-        user.setPassword(encodedPassword);
-        user.setActive(false);
-        user.setToken(GenerateRandonString.generateRandomString());
-
-        ClientUserDTO clientUserDTO = new ClientUserDTO(userRepository.save(user));
-
-        mailSender.sendVerificationEmail(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(clientUserDTO);
     }
 
     public ResponseEntity<?> verifyUser(@Valid String verificationToken) {
