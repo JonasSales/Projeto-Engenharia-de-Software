@@ -21,7 +21,7 @@ public class OrganizacaoController {
 
     @PostMapping("/create")
     ResponseEntity<?> registerOrganizacao(@RequestBody Organizacao organizacao) {
-        return organizacaoService.registerOrganization(organizacao);
+        return organizacaoService.registrarOrganizacao(organizacao);
     }
 
     @PostMapping("/create/endereco/{id}")
