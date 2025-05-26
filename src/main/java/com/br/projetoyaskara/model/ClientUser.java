@@ -3,6 +3,7 @@ package com.br.projetoyaskara.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,6 +40,7 @@ public class ClientUser implements UserDetails {
     private String email;
 
     @NotBlank(message = "Uma senha precisa ser definida")
+    @NotEmpty(message = "A senha não pode ser vazia")
     @Size(min = 6, max = 100, message = "A senha deve ter no mínimo 6 caracteres e no máximo 100 caracteres")
     private String password;
 
