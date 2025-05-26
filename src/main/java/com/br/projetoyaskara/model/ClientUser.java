@@ -55,12 +55,15 @@ public class ClientUser implements UserDetails {
 
     private String token;
 
-    @OneToMany(mappedBy = "clientUser", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "clientUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AvaliacoesEventos> avaliacoes;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "endereco_id", referencedColumnName = "id")
     private Endereco endereco;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Checkins> checkins;
 
     public ClientUser(String email, String password) {
         this.email = email;
