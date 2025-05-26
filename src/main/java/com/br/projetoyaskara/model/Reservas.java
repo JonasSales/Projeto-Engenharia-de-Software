@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -39,5 +40,12 @@ public class Reservas {
     private Status status;
 
     private LocalDateTime dataReserva;
+
+    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Pagamentos> pagamentos;
+
+    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Checkins checkin;
 }
+
 

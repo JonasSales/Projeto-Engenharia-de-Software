@@ -34,10 +34,10 @@ public class Eventos {
 
     private LocalDateTime criadoEm;
 
-    @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AvaliacoesEventos> avaliacoes;
 
-    @OneToOne(mappedBy = "evento")
+    @OneToOne(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
     private LotesIngresso lotesIngresso;
 
     @OneToOne(cascade = CascadeType.ALL)

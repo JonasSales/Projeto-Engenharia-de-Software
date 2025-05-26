@@ -33,7 +33,7 @@ public class Organizacao {
     @NotBlank
     private String description;
 
-    @OneToMany(mappedBy = "organizacao", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "organizacao", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Eventos> eventosList;
 
     @NotBlank(message = "É necessário inserir um CNPJ")
