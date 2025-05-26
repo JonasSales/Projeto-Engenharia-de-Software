@@ -45,6 +45,26 @@ public class OrganizacaoService {
         }
     }
 
+    public ResponseEntity<?> cadastrarEndereco(UUID idOrganizacao, Endereco endereco) {
+        Organizacao organizacao = organizacaoRepository.findOrganizacaoById(idOrganizacao);
+
+        if (organizacao == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Organização não encontrada no banco de dados. Verifique o ID.");
+        }
+
+        if (organizacao.getEndereco() != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Essa organização já possui um endereço cadastrado.");
+        }
+
+        Endereco enderecoSalvo = enderecoRepository.save(endereco);
+        organizacao.setEndereco(enderecoSalvo);
+        organizacaoRepository.save(organizacao);
+
+        return ResponseEntity.ok(toDTO(organizacao));
+    }
+
     public ResponseEntity<?> updateOrganizacao(Organizacao organizacao) {
         Organizacao updatedOrganizacao = organizacaoRepository.findOrganizacaoById(organizacao.getId());
 
@@ -76,6 +96,16 @@ public class OrganizacaoService {
         return ResponseEntity.ok(toDTO(updatedOrganizacao));
     }
 
+    public ResponseEntity<?> deletarOrganizacao(UUID id) {
+
+        if (organizacaoRepository.findOrganizacaoById(id) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe organização com este ID");
+        }
+
+        organizacaoRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("A organização do ID " + id + " foi deletada com sucesso.");
+    }
+
     public ResponseEntity<?> getAllOrganizacoes() {
         List<Organizacao> organizacoes = organizacaoRepository.findAll();
         List<OrganizacaoDTO> dtos = organizacoes.stream()
@@ -101,32 +131,8 @@ public class OrganizacaoService {
         return ResponseEntity.ok(dtos);
     }
 
-    public ResponseEntity<?> cadastrarEndereco(UUID idOrganizacao, Endereco endereco) {
-        Organizacao organizacao = organizacaoRepository.findOrganizacaoById(idOrganizacao);
-
-        if (organizacao == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Organização não encontrada no banco de dados. Verifique o ID.");
-        }
-
-        if (organizacao.getEndereco() != null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Essa organização já possui um endereço cadastrado.");
-        }
-
-        Endereco enderecoSalvo = enderecoRepository.save(endereco);
-        organizacao.setEndereco(enderecoSalvo);
-        organizacaoRepository.save(organizacao);
-
-        return ResponseEntity.ok(toDTO(organizacao));
-    }
 
     private OrganizacaoDTO toDTO(Organizacao organizacao) {
         return new OrganizacaoDTO(organizacao);
-    }
-
-    public ResponseEntity<?> deletarOrganizacao(UUID id) {
-        organizacaoRepository.deleteById(id);
-        return ResponseEntity.status(HttpStatus.OK).body("A organização do ID " + id + " foi deletada com sucesso.");
     }
 }
