@@ -44,5 +44,10 @@ public class OrganizacaoController {
         return organizacaoService.getOrganizacaoById(id);
     }
 
+    @PostMapping("/update")
+    ResponseEntity<?> updateOrganizacao(@RequestBody Organizacao organizacao) {
+        return organizacaoService.updateOrganizacao(organizacao);
+    }
+
 
 }
