@@ -25,7 +25,7 @@ public class OrganizacaoService {
         this.enderecoRepository = enderecoRepository;
     }
 
-    public ResponseEntity<Object> registerOrganization(Organizacao organizacao) {
+    public ResponseEntity<Object> registrarOrganizacao(Organizacao organizacao) {
         if (organizacao.getEndereco() != null) {
             Endereco enderecoSalvo = enderecoRepository.save(organizacao.getEndereco());
             organizacao.setEndereco(enderecoSalvo);
