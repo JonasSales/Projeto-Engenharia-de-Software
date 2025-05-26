@@ -6,9 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface OrganizacaoRepository extends JpaRepository<Organizacao, Long> {
+public interface OrganizacaoRepository extends JpaRepository<Organizacao, UUID> {
 
     List<Organizacao> findAllByNameContaining(@NotBlank String name);
+
+    Organizacao findOrganizacaoById(UUID id);
 }
