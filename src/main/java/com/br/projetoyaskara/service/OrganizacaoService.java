@@ -124,4 +124,9 @@ public class OrganizacaoService {
     private OrganizacaoDTO toDTO(Organizacao organizacao) {
         return new OrganizacaoDTO(organizacao);
     }
+
+    public ResponseEntity<?> deletarOrganizacao(UUID id) {
+        organizacaoRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("A organização do ID " + id + " foi deletada com sucesso.");
+    }
 }
