@@ -49,5 +49,10 @@ public class OrganizacaoController {
         return organizacaoService.updateOrganizacao(organizacao);
     }
 
+    @PostMapping("/delete/{id}")
+    ResponseEntity<?> deleteOrganizacao(@PathVariable UUID id) {
+        return organizacaoService.deletarOrganizacao(id);
+    }
+
 
 }
