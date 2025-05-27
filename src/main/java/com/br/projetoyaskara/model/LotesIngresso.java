@@ -28,7 +28,7 @@ public class LotesIngresso {
     @Column(length = 100, nullable = false)
     private String name;
 
-    private int valor; // se for em centavos, considere documentar isso
+    private int valor; //O valor será em centavos, exemplo 1 real: será armazenado como 100.
 
     private int totalIngressos;
 
