@@ -25,7 +25,7 @@ public class LotesIngressosService {
         if (lotesIngresso == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        if (eventosRepository.findEventosById(lotesIngresso.getId()) != null) {
+        if (eventosRepository.findEventosById(lotesIngresso.getEvento().getId()) != null) {
             LotesIngresso ingressoSalvo = lotesIngressosRepository.save(lotesIngresso);
 
             return ResponseEntity.ok().body(toDTO(ingressoSalvo));
@@ -51,7 +51,7 @@ public class LotesIngressosService {
         return ResponseEntity.ok().body(toDTO(lotesIngressoSalvo));
     }
 
-    public ResponseEntity<?> deletarEvento(LotesIngressoDTO lotesIngresso){
+    public ResponseEntity<?> deletarIngresso(LotesIngressoDTO lotesIngresso){
 
         LotesIngresso lotesIngressoSalvo = lotesIngressosRepository.findLotesIngressoById(lotesIngresso.getId());
         if (lotesIngressoSalvo == null|| eventosRepository.findEventosById(lotesIngresso.getIdEvento()) == null) {
@@ -75,7 +75,12 @@ public class LotesIngressosService {
     }
 
     public ResponseEntity<?> buscarIngressosPorEventoId(Long eventoId) {
-        return ResponseEntity.status(HttpStatus.OK).body(toDTO(lotesIngressosRepository.findLotesIngressoByEventoId(eventoId)));
+        LotesIngresso lotesIngresso = lotesIngressosRepository.findLotesIngressoByEventoId(eventoId);
+        if (lotesIngresso == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe este evento, por favor se" +
+                    " certifique se ele realmente existe.");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(toDTO(lotesIngresso));
     }
 
     public ResponseEntity<?> buscarIngressosPorFaixaDePreco(int faixaMenorPreco, int faixaMaiorPreco){
