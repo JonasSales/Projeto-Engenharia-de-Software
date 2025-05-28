@@ -19,6 +19,7 @@ public class LotesIngressosDTO {
         setId(lotesIngresso.getId());
         setName(lotesIngresso.getName());
         setIdEvento(lotesIngresso.getEvento().getId());
+        setValor(lotesIngresso.getValor());
         setTotalIngressos(lotesIngresso.getTotalIngressos());
         setTotalIngressos(lotesIngresso.getTotalIngressos());
         setDataInicio(lotesIngresso.getDataInicio());
@@ -30,6 +31,7 @@ public class LotesIngressosDTO {
     private long idEvento;
     private long totalIngressos;
     private long quantidadeVendida;
+    private int valor;
     private LocalDateTime dataInicio;
     private LocalDateTime dataFim;
 }
