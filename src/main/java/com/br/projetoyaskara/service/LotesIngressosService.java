@@ -63,6 +63,13 @@ public class LotesIngressosService {
         return ResponseEntity.ok().body("Ingresso deleta com sucesso");
     }
 
+    public ResponseEntity<?> listarIngressos(){
+        List<LotesIngresso> lotesIngressos = lotesIngressosRepository.findAll();
+        return ResponseEntity.ok().body(lotesIngressos.stream()
+                .map(this::toDTO)
+                .toList());
+    }
+
     public ResponseEntity<?> buscarIngressoPorId(Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(toDTO(lotesIngressosRepository.findLotesIngressoById(id)));
     }
@@ -73,11 +80,9 @@ public class LotesIngressosService {
 
     public ResponseEntity<?> buscarIngressosPorFaixaDePreco(int faixaMenorPreco, int faixaMaiorPreco){
         List<LotesIngresso> lotesIngressos = lotesIngressosRepository.findLotesIngressosPorFaixaDePreco(faixaMenorPreco, faixaMaiorPreco);
-        List<LotesIngressoDTO> dtos = lotesIngressos.stream()
+        return ResponseEntity.ok(lotesIngressos.stream()
                 .map(LotesIngressoDTO::new)
-                .toList();
-
-        return ResponseEntity.ok(dtos);
+                .toList());
     }
 
     private LotesIngressoDTO toDTO(LotesIngresso lotesIngresso) {
