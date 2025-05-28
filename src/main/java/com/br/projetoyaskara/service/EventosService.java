@@ -57,10 +57,9 @@ public class EventosService {
 
     public ResponseEntity<?> listarEventos() {
         List<Eventos> eventos = eventosRepository.findAll();
-        List<EventosDTO> dtos = eventos.stream()
-                .map(EventosDTO::new)
-                .toList();
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(eventos.stream()
+                .map(this::toDto)
+                .toList());
     }
 
     public ResponseEntity<?> deletarEvento(long id) {
