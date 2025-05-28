@@ -34,17 +34,28 @@ public class SecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        try {
+            String token = this.recoverToken(request);
+            if (token != null) {
+                String subject = tokenService.validateToken(token);
+                UserDetails userDetails = userRepository.findByEmail(subject);
 
-        String token = this.recoverToken(request);
-        if (token != null) {
-            String subject = tokenService.validateToken(token);
-            UserDetails userDetails = userRepository.findByEmail(subject);
+                var authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
 
-            var authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            filterChain.doFilter(request, response);
+
+        } catch (com.br.projetoyaskara.exception.TokenException ex) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Token expirado ou inválido.\"}");
+            response.getWriter().flush();
         }
-        filterChain.doFilter(request, response);
     }
+
 
     private String recoverToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
