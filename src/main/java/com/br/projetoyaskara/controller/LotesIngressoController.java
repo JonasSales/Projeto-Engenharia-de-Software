@@ -1,10 +1,12 @@
 package com.br.projetoyaskara.controller;
 
+import com.br.projetoyaskara.dto.FaixaDePreco;
+import com.br.projetoyaskara.dto.LotesIngressoDTO;
+import com.br.projetoyaskara.model.LotesIngresso;
 import com.br.projetoyaskara.service.LotesIngressosService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/ingressos")
@@ -17,8 +19,40 @@ public class LotesIngressoController {
         this.lotesIngressosService = lotesIngressosService;
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<?> create(@RequestBody LotesIngresso lotesIngresso) {
+        return ResponseEntity.ok(lotesIngressosService.cadastrarIngresso(lotesIngresso));
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<?> update(@RequestBody LotesIngressoDTO lotesIngresso) {
+        return ResponseEntity.ok(lotesIngressosService.atualizarIngresso(lotesIngresso));
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> delete(@RequestBody LotesIngressoDTO lotesIngresso) {
+        return ResponseEntity.ok(lotesIngressosService.deletarIngresso(lotesIngresso));
+    }
+
     @GetMapping("/get")
     public ResponseEntity<?> buscarIngressos() {
         return ResponseEntity.ok(lotesIngressosService.listarIngressos());
     }
+
+    @GetMapping("/get/id/{id}")
+    public ResponseEntity<?> buscarIngressoId(@PathVariable Long id) {
+        return ResponseEntity.ok(lotesIngressosService.buscarIngressoPorId(id));
+    }
+
+    @GetMapping("/get/idEvento/{id}")
+    public ResponseEntity<?> buscarIngressoPorIdEvento(@PathVariable Long id) {
+        return ResponseEntity.ok(lotesIngressosService.buscarIngressosPorEventoId(id));
+    }
+
+    @GetMapping("/get/preco")
+    public ResponseEntity<?> buscarIngressoPorPreco(@RequestBody FaixaDePreco faixaDePreco) {
+        return ResponseEntity.ok(lotesIngressosService
+                .buscarIngressosPorFaixaDePreco(faixaDePreco.menorPreco(), faixaDePreco.maiorPreco()));
+    }
+
 }
