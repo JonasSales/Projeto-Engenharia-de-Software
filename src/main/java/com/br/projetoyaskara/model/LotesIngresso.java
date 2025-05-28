@@ -30,9 +30,9 @@ public class LotesIngresso {
 
     private int valor; //O valor será em centavos, exemplo 1 real: será armazenado como 100.
 
-    private int totalIngressos;
+    private long totalIngressos;
 
-    private int totalVendas;
+    private long totalVendas;
 
     private LocalDateTime dataInicio;
 
