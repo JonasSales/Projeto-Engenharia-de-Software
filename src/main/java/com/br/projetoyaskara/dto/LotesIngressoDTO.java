@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class LotesIngressosDTO {
+public class LotesIngressoDTO {
 
-    public LotesIngressosDTO (LotesIngresso lotesIngresso) {
+    public LotesIngressoDTO(LotesIngresso lotesIngresso) {
         setId(lotesIngresso.getId());
         setName(lotesIngresso.getName());
         setIdEvento(lotesIngresso.getEvento().getId());
