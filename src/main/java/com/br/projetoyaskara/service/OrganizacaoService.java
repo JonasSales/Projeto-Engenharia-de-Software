@@ -46,23 +46,28 @@ public class OrganizacaoService {
     }
 
     public ResponseEntity<?> cadastrarEndereco(UUID idOrganizacao, Endereco endereco) {
-        Organizacao organizacao = organizacaoRepository.findOrganizacaoById(idOrganizacao);
+        try {
+            Organizacao organizacao = organizacaoRepository.findOrganizacaoById(idOrganizacao);
 
-        if (organizacao == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Organização não encontrada no banco de dados. Verifique o ID.");
+            if (organizacao == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Organização não encontrada no banco de dados. Verifique o ID.");
+            }
+
+            if (organizacao.getEndereco() != null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Essa organização já possui um endereço cadastrado.");
+            }
+
+            Endereco enderecoSalvo = enderecoRepository.save(endereco);
+            organizacao.setEndereco(enderecoSalvo);
+            organizacaoRepository.save(organizacao);
+
+            return ResponseEntity.ok(toDTO(organizacao));
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao cadastrar organização " + e.getMessage());
         }
 
-        if (organizacao.getEndereco() != null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Essa organização já possui um endereço cadastrado.");
-        }
-
-        Endereco enderecoSalvo = enderecoRepository.save(endereco);
-        organizacao.setEndereco(enderecoSalvo);
-        organizacaoRepository.save(organizacao);
-
-        return ResponseEntity.ok(toDTO(organizacao));
     }
 
     public ResponseEntity<?> updateOrganizacao(Organizacao organizacao) {
