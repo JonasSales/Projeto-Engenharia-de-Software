@@ -16,13 +16,13 @@ import java.util.UUID;
 public class ClientUserDTO {
 
     public ClientUserDTO(ClientUser client) {
+        setId(client.getId());
         setName(client.getName());
         setEmail(client.getEmail());
-        setId(client.getId());
         setRole(client.getRole().toString());
         setCreated(LocalDateTime.now());
         setModified(LocalDateTime.now());
-        setActive(isActive());
+        setActive(client.isActive());
     }
 
     private UUID id;

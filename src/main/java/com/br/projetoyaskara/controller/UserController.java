@@ -27,6 +27,11 @@ public class UserController {
         return userService.RegisterUser(clientUser);
     }
 
+    @PostMapping("/delete")
+    public ResponseEntity<?> deletarUser(@RequestBody ClientUser clientUser) {
+        return ResponseEntity.ok().body(userService.deletarUser(clientUser));
+    }
+
     @PostMapping("/update")
     public ResponseEntity<?> atualizarUser( @RequestBody ClientUser clientUser) {
         return userService.atualizarUser(clientUser);
