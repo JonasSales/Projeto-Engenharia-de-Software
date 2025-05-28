@@ -48,7 +48,7 @@ public class EventosController {
         return ResponseEntity.ok().body(eventosService.buscarEventosPorNomeDaOrganizacao(nomeOrganizacao));
     }
 
-    @GetMapping("/get/descricao/{descEvento}")
+    @PostMapping("/get/descricao/{descEvento}")
     public ResponseEntity<?> getEventoByDescEvento(@PathVariable String descEvento) {
         return ResponseEntity.ok().body(eventosService.buscarEventosPorDescricao(descEvento));
     }

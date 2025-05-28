@@ -1,6 +1,7 @@
 package com.br.projetoyaskara.controller;
 
 import com.br.projetoyaskara.model.ClientUser;
+import com.br.projetoyaskara.model.Eventos;
 import com.br.projetoyaskara.service.UserService;
 import jakarta.mail.MessagingException;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +25,11 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<?> register(@RequestBody ClientUser clientUser) throws MessagingException, UnsupportedEncodingException {
         return userService.RegisterUser(clientUser);
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<?> atualizarUser( @RequestBody ClientUser clientUser) {
+        return userService.atualizarUser(clientUser);
     }
 
     @GetMapping("/verify")

@@ -1,6 +1,5 @@
 package com.br.projetoyaskara.service;
 
-
 import com.br.projetoyaskara.dto.ClientUserDTO;
 import com.br.projetoyaskara.model.ClientUser;
 import com.br.projetoyaskara.repository.UserRepository;
@@ -9,6 +8,7 @@ import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.br.projetoyaskara.repository.EnderecoRepository;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,15 +16,18 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
+import static com.br.projetoyaskara.util.Utils.atualizarEndereco;
+
 @Service
 public class UserService {
 
-
+    final EnderecoRepository enderecoRepository;
     final UserRepository userRepository;
     final PasswordEncoder passwordEncoder;
     final MailService mailSender;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailSender) {
+    public UserService(EnderecoRepository enderecoRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailSender) {
+        this.enderecoRepository = enderecoRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
@@ -71,4 +74,45 @@ public class UserService {
         return ResponseEntity.ok().body(new ClientUserDTO(userRepository.findClientUserById(id)));
     }
 
+    public ResponseEntity<?> atualizarUser(ClientUser clientUser) {
+        ClientUser clientUserAtualizado = userRepository.findClientUserById(clientUser.getId());
+        if (clientUserAtualizado == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe cliente com esse id: " + clientUser.getId());
+        }
+
+        //pode alguém querer remover o endereço
+        if (clientUserAtualizado.getEndereco() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Endereço invalido");
+        }
+
+        clientUserAtualizado.setEmail(clientUser.getEmail());
+        clientUserAtualizado.setRole(clientUser.getRole());
+        clientUserAtualizado.setCreated(clientUser.getCreated());
+        clientUserAtualizado.setModified(clientUser.getModified());
+        clientUserAtualizado.setActive(clientUser.isActive());
+        clientUserAtualizado.setPassword(clientUser.getPassword());
+
+        atualizarEndereco(clientUserAtualizado.getEndereco(), clientUser.getEndereco());
+        userRepository.save(clientUserAtualizado);
+        enderecoRepository.save(clientUser.getEndereco());
+        return ResponseEntity.status(HttpStatus.OK).body(toDto(clientUser));
+    }
+
+    private ClientUserDTO toDto(ClientUser clientUser) {
+        return new ClientUserDTO(clientUser);
+    }
 }
+
+//private UUID id;
+//
+//    private String name;
+//
+//    private String email;
+//
+//    private String role;
+//
+//    private LocalDateTime created;
+//
+//    private LocalDateTime modified;
+//
+//    private boolean active;
