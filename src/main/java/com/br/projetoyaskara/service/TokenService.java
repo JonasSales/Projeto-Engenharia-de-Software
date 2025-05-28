@@ -3,6 +3,7 @@ package com.br.projetoyaskara.service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.*;
+import com.br.projetoyaskara.exception.TokenException;
 import com.br.projetoyaskara.model.ClientUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,17 +43,17 @@ public class TokenService {
                     .verify(token)
                     .getSubject();
         } catch (TokenExpiredException e) {
-            throw new RuntimeException("Token expirado", e);
+            throw new TokenException("Token expirado", e);
         } catch (SignatureVerificationException e) {
-            throw new RuntimeException("Assinatura inválida", e);
+            throw new TokenException("Assinatura inválida", e);
         } catch (AlgorithmMismatchException e) {
-            throw new RuntimeException("Algoritmo do token não corresponde", e);
+            throw new TokenException("Algoritmo do token não corresponde", e);
         } catch (InvalidClaimException e) {
-            throw new RuntimeException("Claims inválidas no token", e);
+            throw new TokenException("Claims inválidas no token", e);
         } catch (JWTVerificationException e) {
-            throw new RuntimeException("Erro ao verificar token", e);
+            throw new TokenException("Erro ao verificar token", e);
         } catch (Exception e) {
-            throw new RuntimeException("Erro inesperado ao validar token", e);
+            throw new TokenException("Erro inesperado ao validar token", e);
         }
     }
 
