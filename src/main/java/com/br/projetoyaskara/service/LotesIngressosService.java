@@ -28,7 +28,7 @@ public class LotesIngressosService {
         if (eventosRepository.findEventosById(lotesIngresso.getEvento().getId()) != null) {
             LotesIngresso ingressoSalvo = lotesIngressosRepository.save(lotesIngresso);
 
-            return ResponseEntity.ok().body(toDTO(ingressoSalvo));
+            return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(ingressoSalvo));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
@@ -48,7 +48,7 @@ public class LotesIngressosService {
         lotesIngressoSalvo.setDataFim(lotesIngresso.getDataFim());
         lotesIngressosRepository.save(lotesIngressoSalvo);
 
-        return ResponseEntity.ok().body(toDTO(lotesIngressoSalvo));
+        return ResponseEntity.status(HttpStatus.OK).body(toDTO(lotesIngressoSalvo));
     }
 
     public ResponseEntity<?> deletarIngresso(LotesIngressoDTO lotesIngresso){
@@ -60,12 +60,12 @@ public class LotesIngressosService {
         }
 
         eventosRepository.deleteById(lotesIngresso.getIdEvento());
-        return ResponseEntity.ok().body("Ingresso deleta com sucesso");
+        return ResponseEntity.status(HttpStatus.OK).body("Ingresso deleta com sucesso");
     }
 
     public ResponseEntity<?> listarIngressos(){
         List<LotesIngresso> lotesIngressos = lotesIngressosRepository.findAll();
-        return ResponseEntity.ok().body(lotesIngressos.stream()
+        return ResponseEntity.status(HttpStatus.OK).body(lotesIngressos.stream()
                 .map(this::toDTO)
                 .toList());
     }
@@ -85,7 +85,7 @@ public class LotesIngressosService {
 
     public ResponseEntity<?> buscarIngressosPorFaixaDePreco(int faixaMenorPreco, int faixaMaiorPreco){
         List<LotesIngresso> lotesIngressos = lotesIngressosRepository.findLotesIngressosPorFaixaDePreco(faixaMenorPreco, faixaMaiorPreco);
-        return ResponseEntity.ok(lotesIngressos.stream()
+        return ResponseEntity.status(HttpStatus.OK).body(lotesIngressos.stream()
                 .map(LotesIngressoDTO::new)
                 .toList());
     }

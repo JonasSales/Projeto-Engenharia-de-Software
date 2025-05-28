@@ -29,7 +29,7 @@ public class EventosService {
         if (eventos.getEndereco() != null) {
             enderecoRepository.save(eventos.getEndereco());
         }
-        return new ResponseEntity<>(eventosRepository.save(eventos), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventosRepository.save(eventos));
     }
 
     public ResponseEntity<?> atualizarEvento(Eventos eventos) {
@@ -57,9 +57,9 @@ public class EventosService {
 
     public ResponseEntity<?> listarEventos() {
         List<Eventos> eventos = eventosRepository.findAll();
-        return ResponseEntity.ok(eventos.stream()
+        return ResponseEntity.status(HttpStatus.OK).body((eventos.stream()
                 .map(this::toDto)
-                .toList());
+                .toList()));
     }
 
     public ResponseEntity<?> deletarEvento(long id) {
@@ -76,7 +76,7 @@ public class EventosService {
         if (eventos == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento não encontrado");
         }
-        return ResponseEntity.ok().body(new EventosDTO(eventos));
+        return ResponseEntity.status(HttpStatus.OK).body(new EventosDTO(eventos));
     }
 
     public ResponseEntity<?> buscarEventosPorNomeDaOrganizacao(String nomeDaOrganizacao) {
@@ -84,10 +84,9 @@ public class EventosService {
         if (eventos == null || eventos.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe eventos com o nome dessa organização");
         }
-        List<EventosDTO> dtos = eventos.stream()
+        return ResponseEntity.status(HttpStatus.OK).body(eventos.stream()
                 .map(EventosDTO::new)
-                .toList();
-        return ResponseEntity.ok(dtos);
+                .toList());
     }
 
     public ResponseEntity<?> buscarEventosPorDescricao(String descricao) {
@@ -95,10 +94,9 @@ public class EventosService {
         if (eventos == null || eventos.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhum evento com essa descricao");
         }
-        List<EventosDTO> dtos = eventos.stream()
+        return ResponseEntity.status(HttpStatus.OK).body(eventos.stream()
                 .map(EventosDTO::new)
-                .toList();
-        return ResponseEntity.ok(dtos);
+                .toList());
     }
 
     public ResponseEntity<?> buscarEventosPorOrganizacaoId(UUID organizacaoId) {
@@ -107,10 +105,9 @@ public class EventosService {
             if (eventos == null || eventos.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe eventos, vefique o ID da organização");
             }
-            List<EventosDTO> dtos = eventos.stream()
+            return ResponseEntity.status(HttpStatus.OK).body(eventos.stream()
                     .map(EventosDTO::new)
-                    .toList();
-            return ResponseEntity.ok(dtos);
+                    .toList());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro inesperado");
         }
@@ -124,10 +121,9 @@ public class EventosService {
             if (eventos == null || eventos.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não há eventos com essa faixa etária");
             }
-            List<EventosDTO> dtos = eventos.stream()
+            return ResponseEntity.status(HttpStatus.OK).body(eventos.stream()
                     .map(EventosDTO::new)
-                    .toList();
-            return ResponseEntity.ok(dtos);
+                    .toList());
         }catch (IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Inconsistência na busca por faixa  etária");
         }
@@ -140,10 +136,9 @@ public class EventosService {
             if  (eventos == null || eventos.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não há eventos com esse status");
             }
-            List<EventosDTO> dtos = eventos.stream()
+            return ResponseEntity.status(HttpStatus.OK).body(eventos.stream()
                     .map(EventosDTO::new)
-                    .toList();
-            return ResponseEntity.ok(dtos);
+                    .toList());
         } catch (IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Inconsistência na busca por status");
         }

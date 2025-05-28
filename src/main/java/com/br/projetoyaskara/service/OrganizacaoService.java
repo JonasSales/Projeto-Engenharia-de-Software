@@ -35,7 +35,7 @@ public class OrganizacaoService {
                 organizacao.setEndereco(enderecoSalvo);
             }
             Organizacao salva = organizacaoRepository.save(organizacao);
-            return ResponseEntity.ok(toDTO(salva));
+            return ResponseEntity.status(HttpStatus.OK).body(toDTO(salva));
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Dados inválidos ou faltando: " + Objects.requireNonNull(e.getRootCause()).getMessage());
@@ -63,7 +63,7 @@ public class OrganizacaoService {
             organizacao.setEndereco(enderecoSalvo);
             organizacaoRepository.save(organizacao);
 
-            return ResponseEntity.ok(toDTO(organizacao));
+            return ResponseEntity.status(HttpStatus.OK).body(toDTO(organizacao));
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao cadastrar organização " + e.getMessage());
         }
@@ -98,7 +98,7 @@ public class OrganizacaoService {
         updatedOrganizacao.setEndereco(enderecoSalvo);
 
         organizacaoRepository.save(updatedOrganizacao);
-        return ResponseEntity.ok(toDTO(updatedOrganizacao));
+        return ResponseEntity.status(HttpStatus.OK).body(toDTO(updatedOrganizacao));
     }
 
     public ResponseEntity<?> deletarOrganizacao(UUID id) {
@@ -113,10 +113,9 @@ public class OrganizacaoService {
 
     public ResponseEntity<?> getAllOrganizacoes() {
         List<Organizacao> organizacoes = organizacaoRepository.findAll();
-        List<OrganizacaoDTO> dtos = organizacoes.stream()
+        return ResponseEntity.status(HttpStatus.OK).body(organizacoes.stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+                .collect(Collectors.toList()));
     }
 
     public ResponseEntity<?> getOrganizacaoById(UUID id) {
@@ -125,15 +124,14 @@ public class OrganizacaoService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Organização não encontrada com o ID informado.");
         }
-        return ResponseEntity.ok(toDTO(organizacao));
+        return ResponseEntity.status(HttpStatus.OK).body(toDTO(organizacao));
     }
 
     public ResponseEntity<?> getOrganizacaoByName(String name) {
         List<Organizacao> organizacoes = organizacaoRepository.findAllByNameContaining(name);
-        List<OrganizacaoDTO> dtos = organizacoes.stream()
+        return ResponseEntity.ok(organizacoes.stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+                .collect(Collectors.toList()));
     }
 
 
