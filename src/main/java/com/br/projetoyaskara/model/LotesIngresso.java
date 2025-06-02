@@ -21,14 +21,14 @@ public class LotesIngresso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY) // mudança para N:1
     @JoinColumn(name = "evento_id", nullable = false)
     private Eventos evento;
 
     @Column(length = 100, nullable = false)
     private String name;
 
-    private int valor; //O valor será em centavos, exemplo 1 real: será armazenado como 100.
+    private int valor; // em centavos
 
     private long totalIngressos;
 
