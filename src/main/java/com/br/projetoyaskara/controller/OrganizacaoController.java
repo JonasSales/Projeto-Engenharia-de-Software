@@ -19,37 +19,38 @@ public class OrganizacaoController {
         this.organizacaoService = organizacaoService;
     }
 
-    @PostMapping("/create")
+    @PostMapping()
     ResponseEntity<?> registerOrganizacao(@RequestBody Organizacao organizacao) {
         return ResponseEntity.ok().body(organizacaoService.registrarOrganizacao(organizacao));
     }
 
-    @PostMapping("/create/endereco/{id}")
+    @PostMapping("/endereco/{id}")
     ResponseEntity<?> cadastraEndereco(@PathVariable UUID id, @RequestBody Endereco endereco) {
         return ResponseEntity.ok().body(organizacaoService.cadastrarEndereco(id, endereco));
     }
 
-    @GetMapping("/get")
+    @GetMapping()
     ResponseEntity<?> getAllOrganizacao() {
         return ResponseEntity.ok().body(organizacaoService.getAllOrganizacoes());
     }
 
-    @GetMapping("/get/name/{name}")
-    ResponseEntity<?> getOrganizacaoByName(@PathVariable String name) {
+    @GetMapping("/name/{name}")
+    public ResponseEntity<?> getOrganizacaoByName(@PathVariable String name) {
         return ResponseEntity.ok().body(organizacaoService.getOrganizacaoByName(name));
     }
 
-    @GetMapping("/get/id/{id}")
-    ResponseEntity<?> getOrganizacaoById(@PathVariable UUID id) {
+    @GetMapping("/id/{id}")
+    public ResponseEntity<?> getOrganizacaoById(@PathVariable UUID id) {
         return ResponseEntity.ok().body(organizacaoService.getOrganizacaoById(id));
     }
 
-    @PostMapping("/update")
+
+    @PutMapping()
     ResponseEntity<?> updateOrganizacao(@RequestBody Organizacao organizacao) {
         return ResponseEntity.ok().body(organizacaoService.updateOrganizacao(organizacao));
     }
 
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     ResponseEntity<?> deleteOrganizacao(@PathVariable UUID id) {
         return ResponseEntity.ok().body(organizacaoService.deletarOrganizacao(id));
     }

@@ -19,37 +19,37 @@ public class LotesIngressoController {
         this.lotesIngressosService = lotesIngressosService;
     }
 
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> create(@RequestBody LotesIngresso lotesIngresso) {
         return ResponseEntity.ok(lotesIngressosService.cadastrarIngresso(lotesIngresso));
     }
 
-    @PostMapping("/update")
+    @PutMapping()
     public ResponseEntity<?> update(@RequestBody LotesIngressoDTO lotesIngresso) {
         return ResponseEntity.ok(lotesIngressosService.atualizarIngresso(lotesIngresso));
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping()
     public ResponseEntity<?> delete(@RequestBody LotesIngressoDTO lotesIngresso) {
         return ResponseEntity.ok(lotesIngressosService.deletarIngresso(lotesIngresso));
     }
 
-    @GetMapping("/get")
+    @GetMapping()
     public ResponseEntity<?> buscarIngressos() {
         return ResponseEntity.ok(lotesIngressosService.listarIngressos());
     }
 
-    @GetMapping("/get/id/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> buscarIngressoId(@PathVariable Long id) {
         return ResponseEntity.ok(lotesIngressosService.buscarIngressoPorId(id));
     }
 
-    @GetMapping("/get/idEvento/{id}")
+    @GetMapping("/evento/{id}")
     public ResponseEntity<?> buscarIngressoPorIdEvento(@PathVariable Long id) {
         return ResponseEntity.ok(lotesIngressosService.buscarIngressosPorEventoId(id));
     }
 
-    @GetMapping("/get/preco")
+    @GetMapping("/preco")
     public ResponseEntity<?> buscarIngressoPorPreco(@RequestBody FaixaDePreco faixaDePreco) {
         return ResponseEntity.ok(lotesIngressosService
                 .buscarIngressosPorFaixaDePreco(faixaDePreco.menorPreco(), faixaDePreco.maiorPreco()));

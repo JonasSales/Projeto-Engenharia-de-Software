@@ -22,17 +22,18 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> register(@RequestBody ClientUser clientUser) throws MessagingException, UnsupportedEncodingException {
         return userService.RegisterUser(clientUser);
     }
 
-    @PostMapping("/delete")
-    public ResponseEntity<?> deletarUser(@RequestBody ClientUser clientUser) {
-        return ResponseEntity.ok().body(userService.deletarUser(clientUser));
+    @DeleteMapping("/{email}")
+    public ResponseEntity<?> deletarUser(@PathVariable String email) {
+        return ResponseEntity.ok().body(userService.deletarUser(email));
     }
 
-    @PostMapping("/update")
+
+    @PutMapping()
     public ResponseEntity<?> atualizarUser( @RequestBody ClientUser clientUser) {
         return userService.atualizarUser(clientUser);
     }
@@ -42,6 +43,6 @@ public class UserController {
         return userService.verifyUser(code);
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable UUID id) {return userService.buscarUserPorId(id);}
 }

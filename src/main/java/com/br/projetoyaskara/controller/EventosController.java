@@ -18,47 +18,47 @@ public class EventosController {
         this.eventosService = eventosService;
     }
 
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> cadastrarEvento( @RequestBody Eventos eventos) {
         return ResponseEntity.ok().body(eventosService.cadastrarEvento(eventos));
     }
 
-    @PostMapping("/update")
+    @PutMapping()
     public ResponseEntity<?> atualizarEvento( @RequestBody Eventos eventos) {
         return ResponseEntity.ok().body(eventosService.atualizarEvento(eventos));
     }
 
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarEvento(@PathVariable long id) {
         return ResponseEntity.ok().body(eventosService.deletarEvento(id));
     }
 
-    @GetMapping("/get")
+    @GetMapping()
     public ResponseEntity<?> getAllEventos() {
         return ResponseEntity.ok().body(eventosService.listarEventos());
     }
 
-    @GetMapping("/get/id/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getEventoById(@PathVariable Long id) {
         return ResponseEntity.ok().body(eventosService.buscarEventoPorId(id));
     }
 
-    @GetMapping("/get/organizacao/nome/{nomeOrganizacao}")
+    @GetMapping("/organizacao/name/{nomeOrganizacao}")
     public ResponseEntity<?> getEventoByNomeOrganizacao(@PathVariable String nomeOrganizacao) {
         return ResponseEntity.ok().body(eventosService.buscarEventosPorNomeDaOrganizacao(nomeOrganizacao));
     }
 
-    @GetMapping("/get/descricao/{descEvento}")
+    @GetMapping("/descricao/{descEvento}")
     public ResponseEntity<?> getEventoByDescEvento(@PathVariable String descEvento) {
         return ResponseEntity.ok().body(eventosService.buscarEventosPorDescricao(descEvento));
     }
 
-    @GetMapping("/get/organizacao/id/{idOrganizacao}")
+    @GetMapping("/organizacao/id/{idOrganizacao}")
     public ResponseEntity<?> getEventoByIdOrganizacao(@PathVariable UUID idOrganizacao) {
         return ResponseEntity.ok().body(eventosService.buscarEventosPorOrganizacaoId(idOrganizacao));
     }
 
-    @GetMapping("/get/faixa/{faixaEtaria}")
+    @GetMapping("/faixa/{faixaEtaria}")
     public ResponseEntity<?> getEventoByFaixaEtaria(@PathVariable String faixaEtaria) {
         return ResponseEntity.ok().body(eventosService.buscarEventosPorFaixaEtaria(faixaEtaria));
     }

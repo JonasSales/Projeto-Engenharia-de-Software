@@ -63,11 +63,11 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> deletarUser(ClientUser clientUser) {
-        if (!userRepository.existsByEmail(clientUser.getEmail())) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe user com esse email: " + clientUser.getEmail());
+    public ResponseEntity<?> deletarUser(String email) {
+        if (!userRepository.existsByEmail(email)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe user com esse email: " + email);
         }
-        userRepository.deleteClientUserByEmail(clientUser.getEmail());
+        userRepository.deleteClientUserByEmail(email);
         return ResponseEntity.noContent().build();
     }
 
