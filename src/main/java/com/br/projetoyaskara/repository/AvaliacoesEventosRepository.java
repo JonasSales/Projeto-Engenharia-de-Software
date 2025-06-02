@@ -10,19 +10,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface AvaliacoesEventosRepository extends JpaRepository<AvaliacoesEventos, Integer> {
+public interface AvaliacoesEventosRepository extends JpaRepository<AvaliacoesEventos, Long> {
 
-    List<AvaliacoesEventos> findByEventoId(long evento_id);
+    AvaliacoesEventos findAvaliacoesEventosById(Long id);
 
-    List<AvaliacoesEventos> findByClientUserId(UUID clientUser_id);
+    List<AvaliacoesEventos> findAvaliacoesEventosByEventoId(long evento);
 
-    List<AvaliacoesEventos> findByNotaGreaterThanEqual(int notaMinima);
+    List<AvaliacoesEventos> findAvaliacoesEventosByClientUserId(UUID clientUser_id);
 
-    List<AvaliacoesEventos> findByEventoIdOrderByHoraAvaliacaoDesc(long eventoId);
-
-    long countByEventoId(long eventoId);
+    long countAvaliacoesEventosByEventoId(long eventoId);
 
     @Query("SELECT AVG(a.nota) FROM AvaliacoesEventos a WHERE a.evento.id = :eventoId")
-    Double findAverageNotaByEventoId(@Param("eventoId") long eventoId);
+    Double notaMediaEvento(@Param("eventoId") long eventoId);
 
 }
