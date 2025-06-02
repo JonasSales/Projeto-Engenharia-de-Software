@@ -1,7 +1,6 @@
 package com.br.projetoyaskara.controller;
 
 import com.br.projetoyaskara.model.ClientUser;
-import com.br.projetoyaskara.model.Eventos;
 import com.br.projetoyaskara.service.UserService;
 import jakarta.mail.MessagingException;
 import org.springframework.data.repository.query.Param;
