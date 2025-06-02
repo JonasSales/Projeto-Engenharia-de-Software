@@ -63,12 +63,11 @@ public class EventosService {
     }
 
     public ResponseEntity<?> deletarEvento(long id) {
-        Eventos evento = eventosRepository.findEventosById(id);
-        if (evento == null) {
+        if (!eventosRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe evento com esse id: " + id);
         }
-        eventosRepository.delete(evento);
-        return ResponseEntity.status(HttpStatus.OK).body("Evento excluido com sucesso");
+        eventosRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<?> buscarEventoPorId(long id) {

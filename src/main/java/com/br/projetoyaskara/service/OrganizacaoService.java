@@ -103,12 +103,12 @@ public class OrganizacaoService {
 
     public ResponseEntity<?> deletarOrganizacao(UUID id) {
 
-        if (organizacaoRepository.findOrganizacaoById(id) == null) {
+        if (!organizacaoRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe organização com este ID");
         }
 
         organizacaoRepository.deleteById(id);
-        return ResponseEntity.status(HttpStatus.OK).body("A organização do ID " + id + " foi deletada com sucesso.");
+        return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<?> getAllOrganizacoes() {

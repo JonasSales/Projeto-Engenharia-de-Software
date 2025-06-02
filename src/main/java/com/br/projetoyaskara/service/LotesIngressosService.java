@@ -53,14 +53,15 @@ public class LotesIngressosService {
 
     public ResponseEntity<?> deletarIngresso(LotesIngressoDTO lotesIngresso){
 
-        LotesIngresso lotesIngressoSalvo = lotesIngressosRepository.findLotesIngressoById(lotesIngresso.getId());
-        if (lotesIngressoSalvo == null|| eventosRepository.findEventosById(lotesIngresso.getIdEvento()) == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Verifique as informações sobre o ID do" +
-                    "Ingresso ou o ID do Evento");
+        if (!lotesIngressosRepository.existsById(lotesIngresso.getId())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Verifique se este lote existe");
+        }
+        else if(!eventosRepository.existsById(lotesIngresso.getIdEvento())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Verifique se evento existe");
         }
 
         eventosRepository.deleteById(lotesIngresso.getIdEvento());
-        return ResponseEntity.status(HttpStatus.OK).body("Ingresso deleta com sucesso");
+        return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<?> listarIngressos(){

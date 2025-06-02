@@ -6,6 +6,7 @@ import com.br.projetoyaskara.model.Endereco;
 import com.br.projetoyaskara.repository.UserRepository;
 import com.br.projetoyaskara.util.GenerateRandonString;
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,13 +62,13 @@ public class UserService {
 
     }
 
+    @Transactional
     public ResponseEntity<?> deletarUser(ClientUser clientUser) {
-        ClientUser user = userRepository.findByEmail((clientUser.getEmail()));
-        if (user == null) {
+        if (!userRepository.existsByEmail(clientUser.getEmail())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe user com esse email: " + clientUser.getEmail());
         }
-        userRepository.delete(user);
-        return ResponseEntity.status(HttpStatus.OK).body("Usuário excluido com sucesso");
+        userRepository.deleteClientUserByEmail(clientUser.getEmail());
+        return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<?> verifyUser(@Valid String verificationToken) {
