@@ -67,4 +67,9 @@ public class EventosController {
     public ResponseEntity<?> getEventoByStatus(@PathVariable String status) {
         return ResponseEntity.ok().body(eventosService.buscarEventosPorStatus(status));
     }
+
+    @GetMapping("/media/{id}")
+    public ResponseEntity<?> getEventoMedia(@PathVariable long id) {
+        return ResponseEntity.ok().body(eventosService.notaMediaEvento(id));
+    }
 }
