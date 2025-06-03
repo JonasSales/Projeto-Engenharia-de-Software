@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -69,8 +68,8 @@ public class AvaliacoesEventosService {
         return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(saved));
     }
 
-    public ResponseEntity<?> update(Long id, AvaliacaoEventosDTO avaliacaoDTO) {
-        AvaliacoesEventos avaliacao = avaliacoesRepository.findAvaliacoesEventosById(id);
+    public ResponseEntity<?> update(AvaliacaoEventosDTO avaliacaoDTO) {
+        AvaliacoesEventos avaliacao = avaliacoesRepository.findAvaliacoesEventosById(avaliacaoDTO.getId());
         if (avaliacao == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Avaliação não encontrada.");
         }
@@ -87,19 +86,6 @@ public class AvaliacoesEventosService {
         }
         avaliacoesRepository.deleteById(id);
         return ResponseEntity.noContent().build();
-    }
-
-    public ResponseEntity<?> avaliacoesEvento(long eventoId) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(avaliacoesRepository.countAvaliacoesEventosByEventoId(eventoId));
-    }
-
-
-    public ResponseEntity<?> mediaPorEvento(long eventoId) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(Objects.requireNonNullElse(avaliacoesRepository.notaMediaEvento(eventoId), 0.0));
     }
 
     private AvaliacaoEventosDTO toDTO(AvaliacoesEventos avaliacoesEventos) {
