@@ -35,9 +35,9 @@ public class SecurityConfig  {
                 .authorizeHttpRequests( authorize -> authorize
                         .requestMatchers("/index.html", "/html/main-page.html", "html/login.html", "html/register.html").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/user/create").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/user").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/verify").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth").permitAll()
                         .anyRequest().authenticated()
                 ).addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
