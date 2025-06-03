@@ -5,7 +5,6 @@ import com.br.projetoyaskara.model.ClientUser;
 import com.br.projetoyaskara.model.Endereco;
 import com.br.projetoyaskara.repository.UserRepository;
 import com.br.projetoyaskara.util.GenerateRandonString;
-import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,7 +14,6 @@ import com.br.projetoyaskara.repository.EnderecoRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -36,9 +34,9 @@ public class UserService {
         this.mailSender = mailSender;
     }
 
-    public ResponseEntity<?> RegisterUser(@Valid ClientUser clientUser) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity<?> RegisterUser(@Valid ClientUser clientUser){
         try {
-            if (userRepository.findByEmail(clientUser.getUsername()) != null) {
+            if (userRepository.existsByEmail(clientUser.getUsername())) {
                 return  ResponseEntity.status(HttpStatus.CONFLICT).body("Usuário já cadastrado");
             }
 
@@ -68,7 +66,7 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe user com esse email: " + email);
         }
         userRepository.deleteClientUserByEmail(email);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.OK).body("Conta deletada com sucesso");
     }
 
     public ResponseEntity<?> verifyUser(@Valid String verificationToken) {
