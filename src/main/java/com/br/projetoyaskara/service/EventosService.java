@@ -2,6 +2,7 @@ package com.br.projetoyaskara.service;
 
 import com.br.projetoyaskara.dto.EventosDTO;
 import com.br.projetoyaskara.model.Eventos;
+import com.br.projetoyaskara.repository.AvaliacoesEventosRepository;
 import com.br.projetoyaskara.repository.EnderecoRepository;
 import com.br.projetoyaskara.repository.EventosRepository;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.br.projetoyaskara.util.Utils.atualizarEndereco;
@@ -19,10 +21,12 @@ public class EventosService {
 
     private final EventosRepository eventosRepository;
     private final EnderecoRepository enderecoRepository;
+    private final AvaliacoesEventosRepository avaliacoesEventosRepository;
 
-    public EventosService(EventosRepository eventosRepository, EnderecoRepository enderecoRepository) {
+    public EventosService(EventosRepository eventosRepository, EnderecoRepository enderecoRepository, AvaliacoesEventosRepository avaliacoesEventosRepository) {
         this.eventosRepository = eventosRepository;
         this.enderecoRepository = enderecoRepository;
+        this.avaliacoesEventosRepository = avaliacoesEventosRepository;
     }
 
     public ResponseEntity<?> cadastrarEvento(Eventos eventos) {
@@ -142,6 +146,12 @@ public class EventosService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Inconsistência na busca por status");
         }
 
+    }
+
+    public ResponseEntity<?> notaMediaEvento(long eventoId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Objects.requireNonNullElse(avaliacoesEventosRepository.notaMediaEvento(eventoId), 0.0));
     }
 
     private EventosDTO toDto(Eventos evento) {
