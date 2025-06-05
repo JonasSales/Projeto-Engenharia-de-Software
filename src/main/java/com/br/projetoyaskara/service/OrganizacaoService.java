@@ -95,6 +95,7 @@ public class OrganizacaoService {
 
         updatedOrganizacao.setName(organizacao.getName());
         updatedOrganizacao.setCnpj(organizacao.getCnpj());
+        updatedOrganizacao.setDescription(organizacao.getDescription());
         updatedOrganizacao.setEndereco(enderecoSalvo);
 
         organizacaoRepository.save(updatedOrganizacao);
