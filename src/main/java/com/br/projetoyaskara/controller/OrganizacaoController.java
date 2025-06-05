@@ -39,7 +39,7 @@ public class OrganizacaoController {
         return ResponseEntity.ok().body(organizacaoService.getOrganizacaoByName(name));
     }
 
-    @GetMapping("/id/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getOrganizacaoById(@PathVariable UUID id) {
         return ResponseEntity.ok().body(organizacaoService.getOrganizacaoById(id));
     }
