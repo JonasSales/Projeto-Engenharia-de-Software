@@ -38,6 +38,10 @@ public class SecurityConfig  {
                         .requestMatchers(HttpMethod.POST,"/user").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/verify").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/eventos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/eventos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/ingressos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/ingressos/**").permitAll()
                         .anyRequest().authenticated()
                 ).addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
