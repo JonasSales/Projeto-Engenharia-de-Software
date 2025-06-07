@@ -11,11 +11,9 @@ import java.util.List;
 @Repository
 public interface LotesIngressosRepository extends JpaRepository<LotesIngresso, Long> {
 
-    LotesIngresso findLotesIngressoById(Long id);
+    List<LotesIngresso> findLotesIngressoByEventoId(Long eventoId);
 
-    LotesIngresso findLotesIngressoByEventoId(Long eventoId);
-
-    @Query("select e from LotesIngresso e where ((e.valor > :primeiraFaixa) and (e.valor < :segundaFaixa)) ")
+    @Query("select e from LotesIngresso e where ((e.valor >= :primeiraFaixa) and (e.valor <= :segundaFaixa)) ")
     List<LotesIngresso> findLotesIngressosPorFaixaDePreco(@Param("primeiraFaixa") int primeiraFaixa,
                                                           @Param("segundaFaixa") int segundaFaixa);
 }
