@@ -1,6 +1,12 @@
 package com.br.projetoyaskara.dto;
 
+import com.br.projetoyaskara.model.Endereco;
 import com.br.projetoyaskara.model.Eventos;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,32 +21,26 @@ import java.util.UUID;
 @NoArgsConstructor
 public class EventosDTO {
 
-    public EventosDTO(Eventos eventos) {
-        setId(eventos.getId());
-        setOrganizacaoId(eventos.getOrganizacao().getId());
-        setDescricao(eventos.getDescricao());
-        setDataInicio(eventos.getDataInicio());
-        setDataFim(eventos.getDataFim());
-        setEndereco(new EnderecoDTO(eventos.getEndereco()));
-        setFaixaEtaria(eventos.getFaixaEtaria());
-        setStatus(eventos.getStatus());
-
-    }
-
     private Long id;
-
-    private UUID organizacaoId;
-
+    @NotBlank(message = "Nome do evento é obrigatório.")
+    @Size(max = 255, message = "Nome do evento não pode exceder 255 caracteres.")
+    private String name;
+    @Size(max = 1000, message = "Descrição do evento não pode exceder 1000 caracteres.")
     private String descricao;
-
+    @NotNull(message = "Data de início é obrigatória.")
+    @FutureOrPresent(message = "Data de início não pode ser no passado.")
     private LocalDateTime dataInicio;
-
+    @NotNull(message = "Data de fim é obrigatória.")
+    @FutureOrPresent(message = "Data de fim não pode ser no passado.")
     private LocalDateTime dataFim;
-
-    private EnderecoDTO endereco;
-
+    @NotNull(message = "Faixa etária é obrigatória.")
     private Eventos.FaixaEtaria faixaEtaria;
-
+    @NotNull(message = "Status é obrigatório.")
     private Eventos.Status status;
+    @NotNull(message = "Organização é obrigatória.")
+    private UUID organizacaoId;
+    @Valid
+    @NotNull(message = "Endereço é obrigatório.")
+    private Endereco endereco;
 
 }
