@@ -13,5 +13,4 @@ public interface OrganizacaoRepository extends JpaRepository<Organizacao, UUID> 
 
     List<Organizacao> findAllByNameContaining(@NotBlank String name);
 
-    Organizacao findOrganizacaoById(UUID id);
 }

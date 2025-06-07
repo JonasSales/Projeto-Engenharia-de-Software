@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public interface EventosRepository extends JpaRepository<Eventos, Long> {
 
-    Eventos findEventosById(long id);
 
     @Query("select e from Eventos e where e.organizacao.name like concat('%', :organizacaoName, '%')")
     List<Eventos> findAllByOrganizacao_Name(@Param("organizacaoName") String organizacaoName);

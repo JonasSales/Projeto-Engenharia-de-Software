@@ -12,13 +12,9 @@ import java.util.UUID;
 @Repository
 public interface AvaliacoesEventosRepository extends JpaRepository<AvaliacoesEventos, Long> {
 
-    AvaliacoesEventos findAvaliacoesEventosById(Long id);
-
     List<AvaliacoesEventos> findAvaliacoesEventosByEventoId(long evento);
 
     List<AvaliacoesEventos> findAvaliacoesEventosByClientUserId(UUID clientUser_id);
-
-    long countAvaliacoesEventosByEventoId(long eventoId);
 
     @Query("SELECT AVG(a.nota) FROM AvaliacoesEventos a WHERE a.evento.id = :eventoId")
     Double notaMediaEvento(@Param("eventoId") long eventoId);
