@@ -1,12 +1,15 @@
 package com.br.projetoyaskara.service;
 
 import com.br.projetoyaskara.dto.ClientUserDTO;
+import com.br.projetoyaskara.exception.BadRequestException;
+import com.br.projetoyaskara.exception.ConflictException;
+import com.br.projetoyaskara.exception.ResourceNotFoundException;
+import com.br.projetoyaskara.mapper.ClientUserMapper;
 import com.br.projetoyaskara.model.ClientUser;
-import com.br.projetoyaskara.model.Endereco;
 import com.br.projetoyaskara.repository.UserRepository;
 import com.br.projetoyaskara.util.GenerateRandonString;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.br.projetoyaskara.repository.EnderecoRepository;
@@ -15,115 +18,125 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-import static com.br.projetoyaskara.util.Utils.atualizarEndereco;
 
 @Service
 public class UserService {
 
-    final EnderecoRepository enderecoRepository;
-    final UserRepository userRepository;
-    final PasswordEncoder passwordEncoder;
-    final MailService mailSender;
+    private final ClientUserMapper clientUserMapper;
+    private final EnderecoRepository enderecoRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final MailService mailSender;
 
-    public UserService(EnderecoRepository enderecoRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailSender) {
+    public UserService(ClientUserMapper clientUserMapper, EnderecoRepository enderecoRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailSender) {
+        this.clientUserMapper = clientUserMapper;
         this.enderecoRepository = enderecoRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
     }
 
-    public ResponseEntity<?> RegisterUser(@Valid ClientUser clientUser){
+
+
+    private ClientUser findClientUserByEmailOrThrow(String email) {
+        ClientUser clientUser = userRepository.findByEmail(email);
+        if (clientUser == null) {
+            throw new ResourceNotFoundException("Cliente não encontrado");
+        }
+        return clientUser;
+    }
+
+    public ResponseEntity<ClientUserDTO> RegisterUser(ClientUser clientUser) throws ConflictException {
         try {
-            if (userRepository.existsByEmail(clientUser.getUsername())) {
-                return  ResponseEntity.status(HttpStatus.CONFLICT).body("Usuário já cadastrado");
+
+            if (userRepository.existsByEmail(clientUser.getEmail())) {
+                throw new ConflictException("Usuário com este e-mail já cadastrado.");
             }
 
-            if (clientUser.getPassword().length() < 6) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Senha menor que 6 digitos");
+            if (clientUser.getPassword() == null || clientUser.getPassword().length() < 6) {
+                throw new BadRequestException("A senha deve ter no mínimo 6 dígitos.");
             }
-            String encodedPassword = passwordEncoder.encode(clientUser.getPassword());
 
-            clientUser.setPassword(encodedPassword);
+
+            clientUser.setPassword(passwordEncoder.encode(clientUser.getPassword()));
+            clientUser.setRole(ClientUser.Role.valueOf(String.valueOf(clientUser.getRole())));
+            clientUser.setCreated(LocalDateTime.now());
+            clientUser.setModified(LocalDateTime.now());
             clientUser.setActive(false);
             clientUser.setToken(GenerateRandonString.generateRandomString());
 
-            ClientUserDTO clientUserDTO = new ClientUserDTO(userRepository.save(clientUser));
+            if (clientUser.getEndereco() != null) {
+                enderecoRepository.save(clientUser.getEndereco());
+            }
 
-            mailSender.sendVerificationEmail(clientUser);
-            return ResponseEntity.status(HttpStatus.CREATED).body(clientUserDTO);
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
+            ClientUser savedUser = userRepository.save(clientUser);
+            mailSender.sendVerificationEmail(savedUser);
 
+            return ResponseEntity.status(HttpStatus.CREATED).body(clientUserMapper.clientUserToClientUserDTO(savedUser));
+        } catch (ConflictException | BadRequestException e) {
+            throw e;
+        } catch (DataIntegrityViolationException e) {
+            System.err.println("Erro de integridade ao registrar usuário: " + e.getMessage());
+            throw new BadRequestException("Erro ao registrar usuário: CNPJ, CPF ou e-mail já em uso ou dados inválidos.");
+        } catch (Exception e) {
+            System.err.println("Erro inesperado ao registrar usuário: " + e.getMessage());
+            throw new RuntimeException("Erro interno ao registrar usuário.");
+        }
     }
 
     @Transactional
-    public ResponseEntity<?> deletarUser(String email) {
-        if (!userRepository.existsByEmail(email)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe user com esse email: " + email);
+    public ResponseEntity<String> deletarUser(String email) {
+        try {
+            ClientUser clientUser = findClientUserByEmailOrThrow(email);
+            userRepository.delete(clientUser);
+            return ResponseEntity.status(HttpStatus.OK).body("Conta deletada com sucesso.");
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Erro inesperado ao deletar usuário: " + e.getMessage());
+            throw new RuntimeException("Erro interno ao deletar usuário.");
         }
-        userRepository.deleteClientUserByEmail(email);
-        return ResponseEntity.status(HttpStatus.OK).body("Conta deletada com sucesso");
     }
 
-    public ResponseEntity<?> verifyUser(@Valid String verificationToken) {
-        ClientUser clientUser = userRepository.findByToken(verificationToken);
-        if (clientUser == null || clientUser.isEnabled()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Usuário já verificado");
+    public ResponseEntity<String> verifyUser(String verificationToken) throws ConflictException {
+        try {
+            ClientUser clientUser = userRepository.findByToken(verificationToken);
+            if (clientUser == null) {
+                throw new BadRequestException("Token de verificação inválido ou expirado.");
+            }
+            if (clientUser.isActive()) {
+                throw new ConflictException("Usuário já verificado.");
+            }
+            clientUser.setToken(null);
+            clientUser.setActive(true);
+            userRepository.save(clientUser);
+            return ResponseEntity.status(HttpStatus.OK).body("Verificação realizada com sucesso.");
+        } catch (BadRequestException | ConflictException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Erro inesperado ao verificar usuário: " + e.getMessage());
+            throw new RuntimeException("Erro interno ao verificar usuário.");
         }
-        clientUser.setToken(null);
-        clientUser.setActive(true);
-        userRepository.save(clientUser);
-        return ResponseEntity.status(HttpStatus.OK).body("Verificação realizada com sucesso");
     }
 
-    public ResponseEntity<?> buscarUserPorId(UUID id) {
-        return ResponseEntity.ok().body(new ClientUserDTO(userRepository.findClientUserById(id)));
-    }
+    public ResponseEntity<ClientUserDTO> atualizarUser(ClientUserDTO clientUserDTO) {
+        try {
+            ClientUser clientUserAtualizado = findClientUserByEmailOrThrow(clientUserDTO.getEmail());
 
-    public ResponseEntity<?> atualizarUser(ClientUser clientUser) {
-        ClientUser clientUserAtualizado = userRepository.findByEmail(clientUser.getEmail());
-        Endereco enderecoClient = enderecoRepository.findEnderecoById(clientUser.getEndereco().getId());
-        if (clientUserAtualizado == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não existe cliente com esse id: " + clientUser.getId());
+            clientUserAtualizado.setName(clientUserDTO.getName());
+            clientUserAtualizado.setModified(LocalDateTime.now());
+            ClientUser updatedUser = userRepository.save(clientUserAtualizado);
+            return ResponseEntity.status(HttpStatus.OK).body(clientUserMapper.clientUserToClientUserDTO(updatedUser));
+        } catch (ResourceNotFoundException | BadRequestException e) {
+            throw e;
+        } catch (DataIntegrityViolationException e) {
+            System.err.println("Erro de integridade ao atualizar usuário: " + e.getMessage());
+            throw new BadRequestException("Erro ao atualizar usuário devido a violação de dados.");
+        } catch (Exception e) {
+            System.err.println("Erro inesperado ao atualizar usuário: " + e.getMessage());
+            throw new RuntimeException("Erro interno ao atualizar usuário.");
         }
-
-        if (enderecoClient == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Endereço invalido");
-        }
-
-        String encodedPassword = passwordEncoder.encode(clientUser.getPassword());
-
-        clientUserAtualizado.setEmail(clientUser.getEmail());
-        clientUserAtualizado.setRole(clientUser.getRole());
-        clientUserAtualizado.setName(clientUser.getName());
-        clientUserAtualizado.setModified(LocalDateTime.now());
-        clientUserAtualizado.setPassword(encodedPassword);
-
-        atualizarEndereco(clientUserAtualizado.getEndereco(), clientUser.getEndereco());
-        userRepository.save(clientUserAtualizado);
-        enderecoRepository.save(clientUser.getEndereco());
-        return ResponseEntity.status(HttpStatus.OK).body(toDto(clientUser));
     }
 
-    private ClientUserDTO toDto(ClientUser clientUser) {
-        return new ClientUserDTO(clientUser);
-    }
 }
-
-//private UUID id;
-//
-//    private String name;
-//
-//    private String email;
-//
-//    private String role;
-//
-//    private LocalDateTime created;
-//
-//    private LocalDateTime modified;
-//
-//    private boolean active;
