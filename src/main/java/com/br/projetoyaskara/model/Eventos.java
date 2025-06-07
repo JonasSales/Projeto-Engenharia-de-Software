@@ -28,6 +28,8 @@ public class Eventos {
     @Column(length = 500)
     private String descricao;
 
+    private String name;
+
     private LocalDateTime dataInicio;
 
     private LocalDateTime dataFim;
