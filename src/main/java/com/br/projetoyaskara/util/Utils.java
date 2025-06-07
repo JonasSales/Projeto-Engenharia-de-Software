@@ -17,5 +17,4 @@ public final class Utils {
         destino.setCidade(origem.getCidade());
     }
 
-
 }
