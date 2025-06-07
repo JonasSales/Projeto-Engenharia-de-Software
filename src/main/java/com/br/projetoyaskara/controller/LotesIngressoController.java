@@ -2,57 +2,60 @@ package com.br.projetoyaskara.controller;
 
 import com.br.projetoyaskara.dto.FaixaDePreco;
 import com.br.projetoyaskara.dto.LotesIngressoDTO;
-import com.br.projetoyaskara.model.LotesIngresso;
 import com.br.projetoyaskara.service.LotesIngressosService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("/ingressos")
 public class LotesIngressoController {
 
     final private LotesIngressosService lotesIngressosService;
-
 
     public LotesIngressoController(LotesIngressosService lotesIngressosService) {
         this.lotesIngressosService = lotesIngressosService;
     }
 
     @PostMapping()
-    public ResponseEntity<?> create(@RequestBody LotesIngresso lotesIngresso) {
-        return ResponseEntity.ok(lotesIngressosService.cadastrarIngresso(lotesIngresso));
+    public ResponseEntity<?> create(@Valid @RequestBody LotesIngressoDTO lotesIngressoDTO) {
+        return lotesIngressosService.cadastrarIngresso(lotesIngressoDTO);
     }
 
     @PutMapping()
-    public ResponseEntity<?> update(@RequestBody LotesIngressoDTO lotesIngresso) {
-        return ResponseEntity.ok(lotesIngressosService.atualizarIngresso(lotesIngresso));
+    public ResponseEntity<?> update(@Valid @RequestBody LotesIngressoDTO lotesIngressoDTO) {
+        return lotesIngressosService.atualizarIngresso(lotesIngressoDTO);
     }
 
-    @DeleteMapping()
-    public ResponseEntity<?> delete(@RequestBody LotesIngressoDTO lotesIngresso) {
-        return ResponseEntity.ok(lotesIngressosService.deletarIngresso(lotesIngresso));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        return lotesIngressosService.deletarIngresso(id);
     }
 
     @GetMapping()
     public ResponseEntity<?> buscarIngressos() {
-        return ResponseEntity.ok(lotesIngressosService.listarIngressos());
+        return lotesIngressosService.listarIngressos();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarIngressoId(@PathVariable Long id) {
-        return ResponseEntity.ok(lotesIngressosService.buscarIngressoPorId(id));
+        return lotesIngressosService.buscarIngressoPorId(id);
     }
 
     @GetMapping("/evento/{id}")
     public ResponseEntity<?> buscarIngressoPorIdEvento(@PathVariable Long id) {
-        return ResponseEntity.ok(lotesIngressosService.buscarIngressosPorEventoId(id));
+        return lotesIngressosService.buscarIngressosPorEventoId(id);
     }
 
     @GetMapping("/preco")
     public ResponseEntity<?> buscarIngressoPorPreco(@RequestBody FaixaDePreco faixaDePreco) {
-        return ResponseEntity.ok(lotesIngressosService
-                .buscarIngressosPorFaixaDePreco(faixaDePreco.menorPreco(), faixaDePreco.maiorPreco()));
+        return lotesIngressosService
+                .buscarIngressosPorFaixaDePreco(faixaDePreco.menorPreco(), faixaDePreco.maiorPreco());
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<?> aumentarVenda(@PathVariable long id){
+        return lotesIngressosService.aumentarVendaEm1(id);
     }
 
 }

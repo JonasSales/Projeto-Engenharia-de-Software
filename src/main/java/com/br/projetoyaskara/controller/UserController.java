@@ -1,17 +1,16 @@
 package com.br.projetoyaskara.controller;
 
+import com.br.projetoyaskara.dto.ClientUserDTO;
+import com.br.projetoyaskara.exception.ConflictException;
 import com.br.projetoyaskara.model.ClientUser;
 import com.br.projetoyaskara.service.UserService;
-import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.UnsupportedEncodingException;
-import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/user")
 public class UserController {
 
@@ -22,26 +21,23 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> register(@RequestBody ClientUser clientUser) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity<?> register(@Valid @RequestBody ClientUser clientUser) throws ConflictException {
         return userService.RegisterUser(clientUser);
     }
 
     @DeleteMapping("/{email}")
     public ResponseEntity<?> deletarUser(@PathVariable String email) {
-        return ResponseEntity.ok().body(userService.deletarUser(email));
+        return userService.deletarUser(email);
     }
 
-
     @PutMapping()
-    public ResponseEntity<?> atualizarUser( @RequestBody ClientUser clientUser) {
-        return userService.atualizarUser(clientUser);
+    public ResponseEntity<?> atualizarUser(@Valid @RequestBody ClientUserDTO clientUserDTO) {
+        return userService.atualizarUser(clientUserDTO);
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<?> verify(@Param("code") String code) {
+    public ResponseEntity<?> verify(@Param("code") String code) throws ConflictException {
         return userService.verifyUser(code);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable UUID id) {return userService.buscarUserPorId(id);}
 }

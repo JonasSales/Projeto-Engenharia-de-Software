@@ -1,14 +1,14 @@
 package com.br.projetoyaskara.controller;
 
-import com.br.projetoyaskara.model.Eventos;
+import com.br.projetoyaskara.dto.EventosDTO;
 import com.br.projetoyaskara.service.EventosService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/eventos")
 public class EventosController {
 
@@ -18,58 +18,58 @@ public class EventosController {
         this.eventosService = eventosService;
     }
 
-    @PostMapping()
-    public ResponseEntity<?> cadastrarEvento( @RequestBody Eventos eventos) {
-        return ResponseEntity.ok().body(eventosService.cadastrarEvento(eventos));
+    @PostMapping
+    public ResponseEntity<?> cadastrarEvento(@Valid @RequestBody EventosDTO eventosDTO) {
+        return eventosService.cadastrarEvento(eventosDTO);
     }
 
-    @PutMapping()
-    public ResponseEntity<?> atualizarEvento( @RequestBody Eventos eventos) {
-        return ResponseEntity.ok().body(eventosService.atualizarEvento(eventos));
+    @PutMapping
+    public ResponseEntity<?> atualizarEvento(@Valid @RequestBody EventosDTO eventosDTO) {
+        return eventosService.atualizarEvento(eventosDTO);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> listarEventos() {
+        return eventosService.listarEventos();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarEvento(@PathVariable long id) {
-        return ResponseEntity.ok().body(eventosService.deletarEvento(id));
-    }
-
-    @GetMapping()
-    public ResponseEntity<?> getAllEventos() {
-        return ResponseEntity.ok().body(eventosService.listarEventos());
+        return eventosService.deletarEvento(id);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getEventoById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(eventosService.buscarEventoPorId(id));
+    public ResponseEntity<?> buscarEventoPorId(@PathVariable long id) {
+        return eventosService.buscarEventoPorId(id);
     }
 
-    @GetMapping("/organizacao/name/{nomeOrganizacao}")
-    public ResponseEntity<?> getEventoByNomeOrganizacao(@PathVariable String nomeOrganizacao) {
-        return ResponseEntity.ok().body(eventosService.buscarEventosPorNomeDaOrganizacao(nomeOrganizacao));
+    @GetMapping("/organizacao/nome/{nomeDaOrganizacao}")
+    public ResponseEntity<?> buscarEventosPorNomeDaOrganizacao(@PathVariable String nomeDaOrganizacao) {
+        return eventosService.buscarEventosPorNomeDaOrganizacao(nomeDaOrganizacao);
     }
 
-    @GetMapping("/descricao/{descEvento}")
-    public ResponseEntity<?> getEventoByDescEvento(@PathVariable String descEvento) {
-        return ResponseEntity.ok().body(eventosService.buscarEventosPorDescricao(descEvento));
+    @GetMapping("/descricao/{descricao}")
+    public ResponseEntity<?> buscarEventosPorDescricao(@PathVariable String descricao) {
+        return eventosService.buscarEventosPorDescricao(descricao);
     }
 
-    @GetMapping("/organizacao/id/{idOrganizacao}")
-    public ResponseEntity<?> getEventoByIdOrganizacao(@PathVariable UUID idOrganizacao) {
-        return ResponseEntity.ok().body(eventosService.buscarEventosPorOrganizacaoId(idOrganizacao));
+    @GetMapping("/organizacao/id/{organizacaoId}")
+    public ResponseEntity<?> buscarEventosPorOrganizacaoId(@PathVariable UUID organizacaoId) {
+        return eventosService.buscarEventosPorOrganizacaoId(organizacaoId);
     }
 
-    @GetMapping("/faixa/{faixaEtaria}")
-    public ResponseEntity<?> getEventoByFaixaEtaria(@PathVariable String faixaEtaria) {
-        return ResponseEntity.ok().body(eventosService.buscarEventosPorFaixaEtaria(faixaEtaria));
+    @GetMapping("/faixa-etaria/{faixaEtaria}")
+    public ResponseEntity<?> buscarEventosPorFaixaEtaria(@PathVariable String faixaEtaria) {
+        return eventosService.buscarEventosPorFaixaEtaria(faixaEtaria);
     }
 
-    @GetMapping("/get/status/{status}")
-    public ResponseEntity<?> getEventoByStatus(@PathVariable String status) {
-        return ResponseEntity.ok().body(eventosService.buscarEventosPorStatus(status));
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> buscarEventosPorStatus(@PathVariable String status) {
+        return eventosService.buscarEventosPorStatus(status);
     }
 
-    @GetMapping("/media/{id}")
-    public ResponseEntity<?> getEventoMedia(@PathVariable long id) {
-        return ResponseEntity.ok().body(eventosService.notaMediaEvento(id));
+    @GetMapping("/{eventoId}/nota-media")
+    public ResponseEntity<?> notaMediaEvento(@PathVariable long eventoId) {
+        return eventosService.notaMediaEvento(eventoId);
     }
 }

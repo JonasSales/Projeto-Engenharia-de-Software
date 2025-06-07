@@ -1,15 +1,17 @@
 package com.br.projetoyaskara.controller;
 
+
+import com.br.projetoyaskara.dto.OrganizacaoDTO;
 import com.br.projetoyaskara.model.Endereco;
-import com.br.projetoyaskara.model.Organizacao;
 import com.br.projetoyaskara.service.OrganizacaoService;
+import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/organizacao")
 public class OrganizacaoController {
 
@@ -20,40 +22,38 @@ public class OrganizacaoController {
     }
 
     @PostMapping()
-    ResponseEntity<?> registerOrganizacao(@RequestBody Organizacao organizacao) {
-        return ResponseEntity.ok().body(organizacaoService.registrarOrganizacao(organizacao));
+    ResponseEntity<?> registerOrganizacao(@Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+        return organizacaoService.registrarOrganizacao(organizacaoDTO);
     }
 
     @PostMapping("/endereco/{id}")
-    ResponseEntity<?> cadastraEndereco(@PathVariable UUID id, @RequestBody Endereco endereco) {
-        return ResponseEntity.ok().body(organizacaoService.cadastrarEndereco(id, endereco));
+    ResponseEntity<?> cadastraEndereco(@PathVariable UUID id, @Valid @RequestBody Endereco endereco) throws BadRequestException {
+
+        return organizacaoService.cadastrarEndereco(id, endereco);
     }
 
     @GetMapping()
     ResponseEntity<?> getAllOrganizacao() {
-        return ResponseEntity.ok().body(organizacaoService.getAllOrganizacoes());
+        return organizacaoService.getAllOrganizacoes();
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getOrganizacaoByName(@PathVariable String name) {
-        return ResponseEntity.ok().body(organizacaoService.getOrganizacaoByName(name));
+        return organizacaoService.getOrganizacaoByName(name);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrganizacaoById(@PathVariable UUID id) {
-        return ResponseEntity.ok().body(organizacaoService.getOrganizacaoById(id));
+        return organizacaoService.getOrganizacaoById(id);
     }
 
-
     @PutMapping()
-    ResponseEntity<?> updateOrganizacao(@RequestBody Organizacao organizacao) {
-        return ResponseEntity.ok().body(organizacaoService.updateOrganizacao(organizacao));
+    ResponseEntity<?> updateOrganizacao(@Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+        return organizacaoService.updateOrganizacao(organizacaoDTO);
     }
 
     @DeleteMapping("/{id}")
     ResponseEntity<?> deleteOrganizacao(@PathVariable UUID id) {
-        return ResponseEntity.ok().body(organizacaoService.deletarOrganizacao(id));
+        return organizacaoService.deletarOrganizacao(id);
     }
-
-
 }
