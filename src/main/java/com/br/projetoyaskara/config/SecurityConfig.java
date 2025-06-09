@@ -39,8 +39,6 @@ public class SecurityConfig  {
         return httpSecurity.csrf(AbstractHttpConfigurer::disable).cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests( authorize -> authorize
-                        .requestMatchers("/index.html", "/html/main-page.html", "html/login.html", "html/register.html").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/user").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/verify").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth").permitAll()
