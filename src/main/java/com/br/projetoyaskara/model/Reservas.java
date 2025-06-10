@@ -1,5 +1,6 @@
 package com.br.projetoyaskara.model;
 
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,8 +45,6 @@ public class Reservas {
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Pagamentos> pagamentos;
 
-    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Checkins checkin;
 }
 
 

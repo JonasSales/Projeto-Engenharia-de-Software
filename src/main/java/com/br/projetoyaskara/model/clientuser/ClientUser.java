@@ -1,5 +1,7 @@
-package com.br.projetoyaskara.model;
+package com.br.projetoyaskara.model.clientuser;
 
+import com.br.projetoyaskara.model.AvaliacoesEventos;
+import com.br.projetoyaskara.model.Endereco;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -45,7 +46,7 @@ public class ClientUser implements UserDetails {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.ROLE_USER;
+    private Role role = Role.USER;
 
     private LocalDateTime created;
 
@@ -62,9 +63,6 @@ public class ClientUser implements UserDetails {
     @JoinColumn(name = "endereco_id", referencedColumnName = "id")
     private Endereco endereco;
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Checkins> checkins;
-
     public ClientUser(String email, String password) {
         this.email = email;
         this.password = password;
@@ -73,7 +71,7 @@ public class ClientUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return role.getAuthorities();
     }
 
     @Override
@@ -109,10 +107,5 @@ public class ClientUser implements UserDetails {
         this.modified = LocalDateTime.now();
     }
 
-    public enum Role {
-        ROLE_USER,
-        ROLE_ADMIN,
-        ROLE_ORGANIZATION
-    }
 }
 
