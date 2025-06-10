@@ -1,7 +1,7 @@
 package com.br.projetoyaskara.mapper;
 
 import com.br.projetoyaskara.dto.ClientUserDTO;
-import com.br.projetoyaskara.model.ClientUser;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
