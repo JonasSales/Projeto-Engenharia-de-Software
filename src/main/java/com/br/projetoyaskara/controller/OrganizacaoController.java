@@ -2,11 +2,11 @@ package com.br.projetoyaskara.controller;
 
 
 import com.br.projetoyaskara.dto.OrganizacaoDTO;
-import com.br.projetoyaskara.model.Endereco;
 import com.br.projetoyaskara.service.OrganizacaoService;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -21,17 +21,13 @@ public class OrganizacaoController {
         this.organizacaoService = organizacaoService;
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::create')")
     @PostMapping()
     ResponseEntity<?> registerOrganizacao(@Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
         return organizacaoService.registrarOrganizacao(organizacaoDTO);
     }
 
-    @PostMapping("/endereco/{id}")
-    ResponseEntity<?> cadastraEndereco(@PathVariable UUID id, @Valid @RequestBody Endereco endereco) throws BadRequestException {
-
-        return organizacaoService.cadastrarEndereco(id, endereco);
-    }
-
+    @PreAuthorize("permitAll()")
     @GetMapping()
     ResponseEntity<?> getAllOrganizacao() {
         return organizacaoService.getAllOrganizacoes();
@@ -42,16 +38,19 @@ public class OrganizacaoController {
         return organizacaoService.getOrganizacaoByName(name);
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrganizacaoById(@PathVariable UUID id) {
         return organizacaoService.getOrganizacaoById(id);
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::put')")
     @PutMapping()
     ResponseEntity<?> updateOrganizacao(@Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
         return organizacaoService.updateOrganizacao(organizacaoDTO);
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::delete')")
     @DeleteMapping("/{id}")
     ResponseEntity<?> deleteOrganizacao(@PathVariable UUID id) {
         return organizacaoService.deletarOrganizacao(id);

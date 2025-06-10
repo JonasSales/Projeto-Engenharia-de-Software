@@ -3,10 +3,12 @@ package com.br.projetoyaskara.service;
 import com.br.projetoyaskara.dto.OrganizacaoDTO;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
 import com.br.projetoyaskara.mapper.OrganizacaoMapper;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.model.Endereco;
 import com.br.projetoyaskara.model.Organizacao;
 import com.br.projetoyaskara.repository.EnderecoRepository;
 import com.br.projetoyaskara.repository.OrganizacaoRepository;
+import com.br.projetoyaskara.repository.UserRepository;
 import org.apache.coyote.BadRequestException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -24,11 +26,17 @@ public class OrganizacaoService {
     private final OrganizacaoMapper organizacaoMapper;
     private final OrganizacaoRepository organizacaoRepository;
     private final EnderecoRepository enderecoRepository;
+    private final UserRepository userRepository;
 
-    public OrganizacaoService(OrganizacaoMapper organizacaoMapper, OrganizacaoRepository organizacaoRepository, EnderecoRepository enderecoRepository) {
+    public OrganizacaoService(OrganizacaoMapper organizacaoMapper, OrganizacaoRepository organizacaoRepository, EnderecoRepository enderecoRepository, UserRepository userRepository) {
         this.organizacaoMapper = organizacaoMapper;
         this.organizacaoRepository = organizacaoRepository;
         this.enderecoRepository = enderecoRepository;
+        this.userRepository = userRepository;
+    }
+
+    private ClientUser findClientOrThrow(UUID uuid) {
+        return userRepository.findById(uuid).orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 
     private Organizacao findOrganizacaoOrThrow(UUID id) {
@@ -38,6 +46,8 @@ public class OrganizacaoService {
     public ResponseEntity<OrganizacaoDTO> registrarOrganizacao(OrganizacaoDTO organizacaoDTO) throws BadRequestException {
         try {
             Organizacao novaOrganizacao = new Organizacao();
+            ClientUser clientUser = findClientOrThrow(organizacaoDTO.getIdProprietario());
+            novaOrganizacao.setProprietario(clientUser);
             novaOrganizacao.setName(organizacaoDTO.getName());
             novaOrganizacao.setDescription(organizacaoDTO.getDescription());
             novaOrganizacao.setCnpj(organizacaoDTO.getCnpj());
@@ -71,37 +81,6 @@ public class OrganizacaoService {
         } catch (Exception e) {
             System.err.println("Erro inesperado ao registrar organização: " + e.getMessage());
             throw new RuntimeException("Erro interno ao registrar organização.");
-        }
-    }
-
-    public ResponseEntity<OrganizacaoDTO> cadastrarEndereco(UUID idOrganizacao, Endereco endereco) throws BadRequestException {
-        try {
-            Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
-
-            if (organizacao.getEndereco() != null) {
-                throw new BadRequestException("Essa organização já possui um endereço cadastrado.");
-            }
-
-            Endereco novoEndereco = new Endereco();
-            novoEndereco.setComplemento(endereco.getComplemento());
-            novoEndereco.setBairro(endereco.getBairro());
-            novoEndereco.setCidade(endereco.getCidade());
-            novoEndereco.setEstado(endereco.getEstado());
-            novoEndereco.setCep(endereco.getCep());
-
-            Endereco enderecoSalvo = enderecoRepository.save(novoEndereco);
-            organizacao.setEndereco(enderecoSalvo);
-            Organizacao organizacaoAtualizada = organizacaoRepository.save(organizacao);
-
-            return ResponseEntity.status(HttpStatus.OK).body(organizacaoMapper.toDTO(organizacaoAtualizada));
-        } catch (ResourceNotFoundException | BadRequestException e) {
-            throw e; // Relança as exceções específicas
-        } catch (DataIntegrityViolationException e) {
-            System.err.println("Erro de integridade ao cadastrar endereço: " + e.getMessage());
-            throw new BadRequestException("Erro ao cadastrar endereço devido a violação de dados.");
-        } catch (Exception e) {
-            System.err.println("Erro inesperado ao cadastrar endereço para organização: " + e.getMessage());
-            throw new RuntimeException("Erro interno ao cadastrar endereço.");
         }
     }
 
