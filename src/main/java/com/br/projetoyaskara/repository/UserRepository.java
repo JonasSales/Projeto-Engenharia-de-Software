@@ -1,6 +1,6 @@
 package com.br.projetoyaskara.repository;
 
-import com.br.projetoyaskara.model.ClientUser;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

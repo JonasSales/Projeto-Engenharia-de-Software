@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.*;
 import com.br.projetoyaskara.exception.TokenException;
-import com.br.projetoyaskara.model.ClientUser;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

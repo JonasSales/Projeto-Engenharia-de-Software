@@ -2,7 +2,7 @@ package com.br.projetoyaskara.controller;
 
 import com.br.projetoyaskara.dto.ClientUserDTO;
 import com.br.projetoyaskara.exception.ConflictException;
-import com.br.projetoyaskara.model.ClientUser;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.repository.query.Param;

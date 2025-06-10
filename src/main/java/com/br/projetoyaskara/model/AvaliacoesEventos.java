@@ -1,5 +1,6 @@
 package com.br.projetoyaskara.model;
 
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

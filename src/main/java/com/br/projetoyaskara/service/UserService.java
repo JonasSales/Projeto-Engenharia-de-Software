@@ -5,7 +5,8 @@ import com.br.projetoyaskara.exception.BadRequestException;
 import com.br.projetoyaskara.exception.ConflictException;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
 import com.br.projetoyaskara.mapper.ClientUserMapper;
-import com.br.projetoyaskara.model.ClientUser;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
+import com.br.projetoyaskara.model.clientuser.Role;
 import com.br.projetoyaskara.repository.UserRepository;
 import com.br.projetoyaskara.util.GenerateRandonString;
 import jakarta.transaction.Transactional;
@@ -60,7 +61,7 @@ public class UserService {
 
 
             clientUser.setPassword(passwordEncoder.encode(clientUser.getPassword()));
-            clientUser.setRole(ClientUser.Role.valueOf(String.valueOf(clientUser.getRole())));
+            clientUser.setRole(Role.USER);
             clientUser.setCreated(LocalDateTime.now());
             clientUser.setModified(LocalDateTime.now());
             clientUser.setActive(false);

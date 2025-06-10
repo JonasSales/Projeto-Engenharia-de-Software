@@ -3,7 +3,7 @@ package com.br.projetoyaskara.controller;
 
 import com.br.projetoyaskara.dto.AuthenticationRequest;
 import com.br.projetoyaskara.dto.AuthenticationResponse;
-import com.br.projetoyaskara.model.ClientUser;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.service.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
