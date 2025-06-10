@@ -20,6 +20,8 @@ import java.util.UUID;
 public class OrganizacaoDTO {
 
     private UUID id;
+    
+    private UUID idProprietario;
 
     @NotBlank(message = "O nome da organização não pode estar em branco.")
     @Size(min = 2, max = 255, message = "O nome da organização deve ter entre 2 e 255 caracteres.")

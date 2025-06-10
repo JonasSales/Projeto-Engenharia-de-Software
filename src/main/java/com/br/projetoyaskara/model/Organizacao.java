@@ -1,8 +1,10 @@
 package com.br.projetoyaskara.model;
 
 
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -48,6 +50,11 @@ public class Organizacao {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proprietario_id", referencedColumnName = "id")
+    @NotNull(message = "A organização deve ter um proprietário.")
+    private ClientUser proprietario;
 
     @PrePersist
     protected void onCreate() {
