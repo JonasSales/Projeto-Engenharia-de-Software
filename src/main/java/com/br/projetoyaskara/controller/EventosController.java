@@ -4,6 +4,7 @@ import com.br.projetoyaskara.dto.EventosDTO;
 import com.br.projetoyaskara.service.EventosService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -18,11 +19,13 @@ public class EventosController {
         this.eventosService = eventosService;
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::create')")
     @PostMapping
     public ResponseEntity<?> cadastrarEvento(@Valid @RequestBody EventosDTO eventosDTO) {
         return eventosService.cadastrarEvento(eventosDTO);
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::put')")
     @PutMapping
     public ResponseEntity<?> atualizarEvento(@Valid @RequestBody EventosDTO eventosDTO) {
         return eventosService.atualizarEvento(eventosDTO);
@@ -33,6 +36,7 @@ public class EventosController {
         return eventosService.listarEventos();
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::delete')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarEvento(@PathVariable long id) {
         return eventosService.deletarEvento(id);
