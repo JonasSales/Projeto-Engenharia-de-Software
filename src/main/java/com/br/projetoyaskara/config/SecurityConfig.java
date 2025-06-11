@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig  {
 
 
@@ -41,13 +43,17 @@ public class SecurityConfig  {
                 .authorizeHttpRequests( authorize -> authorize
                         .requestMatchers("/index.html", "/html/main-page.html", "html/login.html", "html/register.html").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
+
                         .requestMatchers(HttpMethod.POST,"/user").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/verify").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/eventos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/eventos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ingressos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ingressos/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET ,"/organizacao").permitAll()
                         .anyRequest().authenticated()
                 ).addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
