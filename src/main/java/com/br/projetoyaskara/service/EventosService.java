@@ -4,6 +4,7 @@ import com.br.projetoyaskara.dto.EventosDTO;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
 import com.br.projetoyaskara.mapper.EventosMapper;
 import com.br.projetoyaskara.model.Eventos;
+import com.br.projetoyaskara.model.Organizacao;
 import com.br.projetoyaskara.repository.AvaliacoesEventosRepository;
 import com.br.projetoyaskara.repository.EnderecoRepository;
 import com.br.projetoyaskara.repository.EventosRepository;
@@ -42,12 +43,13 @@ public class EventosService {
     private Eventos findEventoOrThrow(Long eventoId) {
         return eventosRepository.findById(eventoId).orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado."));}
 
-    private void findOrganizacaoOrThrow(UUID organizacaoId) {
-        organizacaoRepository.findById(organizacaoId).orElseThrow(() -> new ResourceNotFoundException("Organizaca não encontrada"));
+    private Organizacao findOrganizacaoOrThrow(UUID organizacaoId) {
+        return organizacaoRepository.findById(organizacaoId).orElseThrow(() -> new ResourceNotFoundException("Organizaca não encontrada"));
     }
+
     public ResponseEntity<?> cadastrarEvento(EventosDTO eventosDTO) {
         try {
-            findEventoOrThrow(eventosDTO.getId());
+            Organizacao organizacao = findOrganizacaoOrThrow(eventosDTO.getOrganizacaoId());
 
             if (eventosDTO.getDataInicio().isAfter(eventosDTO.getDataFim())) {
                 throw new BadRequestException("Data de início não pode ser posterior à data de fim.");
@@ -57,8 +59,13 @@ public class EventosService {
                 enderecoRepository.save(eventosDTO.getEndereco());
             }
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(
-                    eventosRepository.save(eventosMapper.eventosDTOToEventos(eventosDTO)));
+            Eventos evento = eventosMapper.toEntity(eventosDTO);
+
+            evento.setOrganizacao(organizacao);
+
+            Eventos eventoSalvo = eventosRepository.save(evento);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(eventosMapper.toDTO(eventoSalvo));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (DataIntegrityViolationException e) {
@@ -71,6 +78,7 @@ public class EventosService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor ao cadastrar evento.");
         }
     }
+
 
     public ResponseEntity<?> atualizarEvento(EventosDTO eventosDTO) {
         try {
@@ -96,7 +104,7 @@ public class EventosService {
             enderecoRepository.save(eventoAtualizado.getEndereco());
 
             return ResponseEntity.status(HttpStatus.OK).body(
-                    eventosMapper.eventosToEventosDTO(eventosRepository.save(eventoAtualizado)));
+                    eventosMapper.toDTO(eventosRepository.save(eventoAtualizado)));
 
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -114,7 +122,7 @@ public class EventosService {
     public ResponseEntity<?> listarEventos() {
         try {
             List<Eventos> eventos = eventosRepository.findAll();
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.eventosToEventosDTO(eventos));
+            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
 
         } catch (Exception e) {
             System.err.println("Erro inesperado ao listar eventos: " + e.getMessage());
@@ -138,7 +146,7 @@ public class EventosService {
     public ResponseEntity<?> buscarEventoPorId(long id) {
         try {
             Eventos eventos = findEventoOrThrow(id);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.eventosToEventosDTO(eventos));
+            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
@@ -150,7 +158,7 @@ public class EventosService {
     public ResponseEntity<?> buscarEventosPorNomeDaOrganizacao(String nomeDaOrganizacao) {
         try {
             List<Eventos> eventos = eventosRepository.findAllByOrganizacao_Name(nomeDaOrganizacao);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.eventosToEventosDTO(eventos));
+            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
         } catch (Exception e) {
             System.err.println("Erro inesperado ao buscar eventos por nome da organização: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor ao buscar eventos.");
@@ -160,7 +168,7 @@ public class EventosService {
     public ResponseEntity<?> buscarEventosPorDescricao(String descricao) {
         try {
             List<Eventos> eventos = eventosRepository.findAllByDescricaoContaining(descricao);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.eventosToEventosDTO(eventos));
+            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
         } catch (Exception e) {
             System.err.println("Erro inesperado ao buscar eventos por descrição: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor ao buscar eventos.");
@@ -173,7 +181,7 @@ public class EventosService {
             findOrganizacaoOrThrow(organizacaoId);
 
             List<Eventos> eventos = eventosRepository.findAllByOrganizacao_Id(organizacaoId);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.eventosToEventosDTO(eventos));
+            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
@@ -186,7 +194,7 @@ public class EventosService {
         try {
             Eventos.FaixaEtaria faixa = Eventos.FaixaEtaria.valueOf(faixaEtaria.toUpperCase());
             List<Eventos> eventos = eventosRepository.findAllByFaixaEtaria(faixa);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.eventosToEventosDTO(eventos));
+            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Inconsistência na busca por faixa etária. Valores aceitos: " + java.util.Arrays.toString(Eventos.FaixaEtaria.values()));
         } catch (Exception e) {
@@ -199,7 +207,7 @@ public class EventosService {
         try {
             Eventos.Status sta = Eventos.Status.valueOf(status.toUpperCase());
             List<Eventos> eventos = eventosRepository.findAllByStatus(sta);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.eventosToEventosDTO(eventos));
+            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Inconsistência na busca por status. Valores aceitos: " + java.util.Arrays.toString(Eventos.Status.values()));
         } catch (Exception e) {
