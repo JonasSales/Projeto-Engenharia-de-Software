@@ -31,15 +31,10 @@ public class ClientUserDTO {
     @Size(max = 255, message = "O e-mail não pode ter mais de 255 caracteres.")
     private String email;
 
-    @NotBlank(message = "A função (role) não pode estar em branco.")
     private String role;
 
-    @NotNull(message = "A data de criação não pode ser nula.")
-    @PastOrPresent(message = "A data de criação não pode ser no futuro.")
     private LocalDateTime created;
 
-    @NotNull(message = "A data de modificação não pode ser nula.")
-    @PastOrPresent(message = "A data de modificação não pode ser no futuro.")
     private LocalDateTime modified;
 
     @NotNull(message = "O status de atividade não pode ser nulo.")
