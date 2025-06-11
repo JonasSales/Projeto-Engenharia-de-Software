@@ -5,6 +5,7 @@ import com.br.projetoyaskara.dto.LotesIngressoDTO;
 import com.br.projetoyaskara.service.LotesIngressosService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,16 +18,19 @@ public class LotesIngressoController {
         this.lotesIngressosService = lotesIngressosService;
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::create')")
     @PostMapping()
     public ResponseEntity<?> create(@Valid @RequestBody LotesIngressoDTO lotesIngressoDTO) {
         return lotesIngressosService.cadastrarIngresso(lotesIngressoDTO);
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::put')")
     @PutMapping()
     public ResponseEntity<?> update(@Valid @RequestBody LotesIngressoDTO lotesIngressoDTO) {
         return lotesIngressosService.atualizarIngresso(lotesIngressoDTO);
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::delete')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         return lotesIngressosService.deletarIngresso(id);
@@ -51,11 +55,6 @@ public class LotesIngressoController {
     public ResponseEntity<?> buscarIngressoPorPreco(@RequestBody FaixaDePreco faixaDePreco) {
         return lotesIngressosService
                 .buscarIngressosPorFaixaDePreco(faixaDePreco.menorPreco(), faixaDePreco.maiorPreco());
-    }
-
-    @PostMapping("/{id}")
-    public ResponseEntity<?> aumentarVenda(@PathVariable long id){
-        return lotesIngressosService.aumentarVendaEm1(id);
     }
 
 }

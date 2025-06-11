@@ -27,7 +27,6 @@ public class OrganizacaoController {
         return organizacaoService.registrarOrganizacao(organizacaoDTO);
     }
 
-    @PreAuthorize("permitAll()")
     @GetMapping()
     ResponseEntity<?> getAllOrganizacao() {
         return organizacaoService.getAllOrganizacoes();
