@@ -21,6 +21,11 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping()
+    public ResponseEntity<ClientUserDTO> getUserProfile(Authentication authentication) {
+        return userService.getProfile(authentication);
+    }
+
     @PostMapping()
     public ResponseEntity<?> register(@Valid @RequestBody ClientUser clientUser) throws ConflictException {
         return userService.RegisterUser(clientUser);
@@ -41,9 +46,6 @@ public class UserController {
         return userService.verifyUser(code);
     }
 
-    @GetMapping()
-    public ResponseEntity<ClientUserDTO> getUserProfile(Authentication authentication) {
-        return userService.getProfile(authentication);
-    }
+
 
 }
