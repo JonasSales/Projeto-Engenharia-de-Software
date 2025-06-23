@@ -1,20 +1,21 @@
 package com.br.projetoyaskara.service;
 
 import com.br.projetoyaskara.dto.AvaliacaoEventosDTO;
-import com.br.projetoyaskara.exception.BadRequestException;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
 import com.br.projetoyaskara.mapper.AvaliacoesEventosMapper;
 import com.br.projetoyaskara.model.AvaliacoesEventos;
 import com.br.projetoyaskara.repository.AvaliacoesEventosRepository;
 import com.br.projetoyaskara.repository.EventosRepository;
 import com.br.projetoyaskara.repository.UserRepository;
-import org.springframework.dao.DataIntegrityViolationException;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -26,7 +27,8 @@ public class AvaliacoesEventosService {
     private final EventosRepository eventosRepository;
     private final UserRepository userRepository;
 
-    public AvaliacoesEventosService(AvaliacoesEventosMapper avaliacoesEventosMapper, AvaliacoesEventosRepository avaliacoesRepository,
+    public AvaliacoesEventosService(AvaliacoesEventosMapper avaliacoesEventosMapper,
+                                    AvaliacoesEventosRepository avaliacoesRepository,
                                     EventosRepository eventosRepository,
                                     UserRepository userRepository) {
         this.avaliacoesEventosMapper = avaliacoesEventosMapper;
@@ -35,98 +37,67 @@ public class AvaliacoesEventosService {
         this.userRepository = userRepository;
     }
 
-    // Método auxiliar para buscar evento, lançando exceção se não encontrado
     private void findEventoOrThrow(Long eventoId) {
         eventosRepository.findById(eventoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado."));
     }
 
-    // Método auxiliar para buscar usuário, lançando exceção se não encontrado
-    private void findClientUserOrThrow(UUID clientUserId) {
-        userRepository.findById(clientUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
-    }
-
-    // Método auxiliar para buscar avaliação, lançando exceção se não encontrada
     private AvaliacoesEventos findAvaliacaoOrThrow(Long avaliacaoId) {
         return avaliacoesRepository.findById(avaliacaoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Avaliação não encontrada."));
     }
 
-    public ResponseEntity<?> avaliacoesPorIdEvento(long eventoId) {
-        try {
-            return ResponseEntity.ok(avaliacoesEventosMapper.toDTOList(avaliacoesRepository.findAvaliacoesEventosByEventoId(eventoId)));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Erro ao buscar avaliações por ID de evento: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor ao buscar avaliações.");
-        }
+    public ResponseEntity<List<AvaliacaoEventosDTO>> avaliacoesPorIdEvento(long eventoId) {
+        List<AvaliacoesEventos> avaliacoes = avaliacoesRepository.findAvaliacoesEventosByEventoId(eventoId);
+        return ResponseEntity.ok(avaliacoesEventosMapper.toDTOList(avaliacoes));
     }
 
-    public ResponseEntity<?> avaliacoesPorClientUserId(UUID clientUserId) {
-        try {
-            findClientUserOrThrow(clientUserId);
-            return ResponseEntity.ok(avaliacoesEventosMapper.toDTOList(avaliacoesRepository.findAvaliacoesEventosByClientUserId(clientUserId)));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Erro ao buscar avaliações por ID de usuário: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor ao buscar avaliações.");
-        }
+    public ResponseEntity<List<AvaliacaoEventosDTO>> avaliacoesDoUsuarioDeUmEvento(Authentication authentication,long eventoId) {
+        UUID clientId = userRepository.findIdByEmail(authentication.getName());
+        findEventoOrThrow(eventoId);
+        List<AvaliacoesEventos> avaliacoes = avaliacoesRepository.avaliacoesDoClientPorEvento(clientId, eventoId);
+        return ResponseEntity.ok(avaliacoesEventosMapper.toDTOList(avaliacoes));
     }
 
-    public ResponseEntity<?> save(AvaliacaoEventosDTO avaliacaoDTO) {
-        try {
-
-            findEventoOrThrow(avaliacaoDTO.getEventoId());
-            findClientUserOrThrow(avaliacaoDTO.getClientUserId());
-
-            AvaliacoesEventos saved = avaliacoesRepository.save(avaliacoesEventosMapper.toEntity(avaliacaoDTO));
-            return ResponseEntity.status(HttpStatus.CREATED).body(avaliacoesEventosMapper.toDTO(saved));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (DataIntegrityViolationException e) {
-            System.err.println("Erro de violação de integridade ao salvar avaliação: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Não foi possível salvar a avaliação devido a uma violação de dados (ex: avaliação duplicada para o mesmo evento/usuário).");
-        } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Erro inesperado ao salvar avaliação: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor ao salvar avaliação.");
-        }
+    public ResponseEntity<List<AvaliacaoEventosDTO>> avaliacoesPorUser(Authentication authentication) {
+        return ResponseEntity.ok(avaliacoesEventosMapper.
+                toDTOList(avaliacoesRepository.findAvaliacoesEventosByClientUserEmail(authentication.getName())));
     }
 
-    public ResponseEntity<?> update(AvaliacaoEventosDTO avaliacaoDTO) {
-        try {
-            AvaliacoesEventos avaliacao = findAvaliacaoOrThrow(avaliacaoDTO.getId());
-            findClientUserOrThrow(avaliacaoDTO.getClientUserId());
-            avaliacao.setNota(avaliacaoDTO.getNota());
-            avaliacao.setComentario(avaliacaoDTO.getComentario());
-            avaliacao.setHoraAvaliacao(LocalDateTime.now());
+    public ResponseEntity<AvaliacaoEventosDTO> save(Authentication authentication, AvaliacaoEventosDTO avaliacaoDTO) {
 
-            return ResponseEntity.status(HttpStatus.OK).body(avaliacoesEventosMapper.toDTO(avaliacoesRepository.save(avaliacao)));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Erro inesperado ao atualizar avaliação: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor ao atualizar avaliação.");
-        }
+        findEventoOrThrow(avaliacaoDTO.getEventoId());
+        AvaliacoesEventos avaliacaoSalva = avaliacoesEventosMapper.toEntity(avaliacaoDTO);
+        avaliacaoSalva.setClientUser(userRepository.findByEmail(authentication.getName()));
+
+        AvaliacoesEventos saved = avaliacoesRepository.save(avaliacaoSalva);
+        return ResponseEntity.status(HttpStatus.CREATED).body(avaliacoesEventosMapper.toDTO(saved));
     }
 
-    public ResponseEntity<?> deleteById(Long id) {
-        try {
-            findAvaliacaoOrThrow(id);
+    public ResponseEntity<AvaliacaoEventosDTO> update(Authentication authentication,AvaliacaoEventosDTO avaliacaoDTO) {
+
+        AvaliacoesEventos avaliacao = findAvaliacaoOrThrow(avaliacaoDTO.getId());
+        UUID clientUserId = userRepository.findIdByEmail(authentication.getName());
+
+        if (!clientUserId.equals(avaliacaoDTO.getClientUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        avaliacao.setNota(avaliacaoDTO.getNota());
+        avaliacao.setComentario(avaliacaoDTO.getComentario());
+        avaliacao.setHoraAvaliacao(LocalDateTime.now());
+
+        return ResponseEntity
+                .status(HttpStatus.OK).body(avaliacoesEventosMapper.toDTO(avaliacoesRepository.save(avaliacao)));
+    }
+
+    public ResponseEntity<Void> deleteById(Authentication authentication , Long id) {
+            AvaliacoesEventos avaliacoesEventos = findAvaliacaoOrThrow(id);
+            UUID clientUserId = userRepository.findIdByEmail(authentication.getName());
+            if (!clientUserId.equals(avaliacoesEventos.getClientUser().getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
             avaliacoesRepository.deleteById(id);
             return ResponseEntity.noContent().build();
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Erro inesperado ao deletar avaliação: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno do servidor ao deletar avaliação.");
-        }
     }
-
 }
