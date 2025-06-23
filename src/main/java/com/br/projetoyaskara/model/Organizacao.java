@@ -41,6 +41,7 @@ public class Organizacao {
     @NotBlank(message = "É necessário inserir um CNPJ")
     @Size(min = 18, max = 18)
     @Pattern(regexp = "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}", message = "Formato de CNPJ inválido")
+    @Column(unique = true, nullable = false)
     private String cnpj;
 
     private LocalDateTime created;
