@@ -13,6 +13,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,32 +44,35 @@ public class OrganizacaoService {
         return organizacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Organização não encontrado"));
     }
 
-    public ResponseEntity<OrganizacaoDTO> registrarOrganizacao(OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+    public ResponseEntity<OrganizacaoDTO> registrarOrganizacao(Authentication authentication, OrganizacaoDTO organizacaoDTO) throws BadRequestException {
         try {
+            UUID idUsuarioAutenticado = userRepository.findIdByEmail(authentication.getName());
+
+            if (!idUsuarioAutenticado.equals(organizacaoDTO.getIdProprietario())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            ClientUser clientUser = findClientOrThrow(idUsuarioAutenticado);
+
             Organizacao novaOrganizacao = new Organizacao();
-            ClientUser clientUser = findClientOrThrow(organizacaoDTO.getIdProprietario());
             novaOrganizacao.setProprietario(clientUser);
             novaOrganizacao.setName(organizacaoDTO.getName());
             novaOrganizacao.setDescription(organizacaoDTO.getDescription());
             novaOrganizacao.setCnpj(organizacaoDTO.getCnpj());
 
-
-            if (organizacaoDTO.getEndereco() != null) {
-                Endereco novoEndereco = new Endereco();
-                novoEndereco.setComplemento(organizacaoDTO.getEndereco().getComplemento());
-                novoEndereco.setBairro(organizacaoDTO.getEndereco().getBairro());
-                novoEndereco.setCidade(organizacaoDTO.getEndereco().getCidade());
-                novoEndereco.setEstado(organizacaoDTO.getEndereco().getEstado());
-                novoEndereco.setCep(organizacaoDTO.getEndereco().getCep());
-
-                Endereco enderecoSalvo = enderecoRepository.save(novoEndereco);
-                novaOrganizacao.setEndereco(enderecoSalvo);
-            } else {
+            if (organizacaoDTO.getEndereco() == null) {
                 throw new BadRequestException("Endereço da organização é obrigatório.");
             }
 
+            Endereco novoEndereco = new Endereco();
+            atualizarEndereco(novoEndereco, organizacaoDTO.getEndereco());
+            Endereco enderecoSalvo = enderecoRepository.save(novoEndereco);
+            novaOrganizacao.setEndereco(enderecoSalvo);
+
             Organizacao salva = organizacaoRepository.save(novaOrganizacao);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(organizacaoMapper.toDTO(salva));
+
         } catch (DataIntegrityViolationException e) {
             System.err.println("Erro de integridade ao registrar organização: " + e.getMessage());
             String errorMessage = "Violação de dados: CNPJ já cadastrado ou dados inválidos.";
@@ -79,15 +83,21 @@ public class OrganizacaoService {
         } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
-            System.err.println("Erro inesperado ao registrar organização: " + e.getMessage());
             throw new RuntimeException("Erro interno ao registrar organização.");
         }
     }
 
-    public ResponseEntity<OrganizacaoDTO> updateOrganizacao(OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+
+    public ResponseEntity<OrganizacaoDTO> updateOrganizacao(Authentication authentication, OrganizacaoDTO organizacaoDTO) throws BadRequestException {
         try {
 
+            UUID idProprietario = userRepository.findIdByEmail(authentication.getName());
             Organizacao organizacaoExistente = findOrganizacaoOrThrow(organizacaoDTO.getId());
+
+            if (!idProprietario.equals(organizacaoExistente.getProprietario().getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             organizacaoExistente.setName(organizacaoDTO.getName());
             organizacaoExistente.setCnpj(organizacaoDTO.getCnpj());
             organizacaoExistente.setDescription(organizacaoDTO.getDescription());
@@ -110,39 +120,44 @@ public class OrganizacaoService {
                 }
             }
 
-
             Organizacao organizacaoSalva = organizacaoRepository.save(organizacaoExistente);
-            return ResponseEntity.status(HttpStatus.OK).body(organizacaoMapper.toDTO(organizacaoSalva));
+            return ResponseEntity.ok(organizacaoMapper.toDTO(organizacaoSalva));
+
         } catch (ResourceNotFoundException | BadRequestException e) {
             throw e;
         } catch (DataIntegrityViolationException e) {
-            System.err.println("Erro de integridade ao atualizar organização: " + e.getMessage());
-            throw new BadRequestException("Erro ao atualizar organização devido a violação de dados.");
+            throw new BadRequestException("Erro ao atualizar organização: violação de integridade dos dados.");
         } catch (Exception e) {
-            System.err.println("Erro inesperado ao atualizar organização: " + e.getMessage());
             throw new RuntimeException("Erro interno ao atualizar organização.");
         }
     }
 
-    public ResponseEntity<Void> deletarOrganizacao(UUID id) {
+
+    public ResponseEntity<Void> deletarOrganizacao(Authentication authentication, UUID organizacaoId) {
         try {
-            Organizacao organizacao = findOrganizacaoOrThrow(id);
+            UUID idProprietario = userRepository.findIdByEmail(authentication.getName());
+            Organizacao organizacao = findOrganizacaoOrThrow(organizacaoId);
+
+            if (!idProprietario.equals(organizacao.getProprietario().getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             organizacaoRepository.delete(organizacao);
             return ResponseEntity.noContent().build();
+
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            System.err.println("Erro inesperado ao deletar organização: " + e.getMessage());
             throw new RuntimeException("Erro interno ao deletar organização.");
         }
     }
+
 
     public ResponseEntity<List<OrganizacaoDTO>> getAllOrganizacoes() {
         try {
             List<Organizacao> organizacoes = organizacaoRepository.findAll();
             return ResponseEntity.status(HttpStatus.OK).body(organizacaoMapper.toDTO(organizacoes));
         } catch (Exception e) {
-            System.err.println("Erro inesperado ao buscar todas as organizações: " + e.getMessage());
             throw new RuntimeException("Erro interno ao buscar organizações.");
         }
     }
@@ -154,7 +169,6 @@ public class OrganizacaoService {
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            System.err.println("Erro inesperado ao buscar organização por ID: " + e.getMessage());
             throw new RuntimeException("Erro interno ao buscar organização.");
         }
     }
@@ -164,7 +178,6 @@ public class OrganizacaoService {
             List<Organizacao> organizacoes = organizacaoRepository.findAllByNameContaining(name);
             return ResponseEntity.ok(organizacaoMapper.toDTO(organizacoes));
         } catch (Exception e) {
-            System.err.println("Erro inesperado ao buscar organizações por nome: " + e.getMessage());
             throw new RuntimeException("Erro interno ao buscar organizações por nome.");
         }
     }

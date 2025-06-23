@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -23,8 +24,20 @@ public class OrganizacaoController {
 
     @PreAuthorize("hasAnyAuthority('organization::create')")
     @PostMapping()
-    ResponseEntity<?> registerOrganizacao(@Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
-        return organizacaoService.registrarOrganizacao(organizacaoDTO);
+    ResponseEntity<?> registerOrganizacao(Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+        return organizacaoService.registrarOrganizacao(authentication,organizacaoDTO);
+    }
+
+    @PreAuthorize("hasAnyAuthority('organization::put')")
+    @PutMapping()
+    ResponseEntity<?> updateOrganizacao(Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+        return organizacaoService.updateOrganizacao(authentication, organizacaoDTO);
+    }
+
+    @PreAuthorize("hasAnyAuthority('organization::delete')")
+    @DeleteMapping("/{id}")
+    ResponseEntity<?> deleteOrganizacao(Authentication authentication,@PathVariable UUID id) {
+        return organizacaoService.deletarOrganizacao(authentication, id);
     }
 
     @GetMapping()
@@ -43,15 +56,7 @@ public class OrganizacaoController {
         return organizacaoService.getOrganizacaoById(id);
     }
 
-    @PreAuthorize("hasAnyAuthority('organization::put')")
-    @PutMapping()
-    ResponseEntity<?> updateOrganizacao(@Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
-        return organizacaoService.updateOrganizacao(organizacaoDTO);
-    }
 
-    @PreAuthorize("hasAnyAuthority('organization::delete')")
-    @DeleteMapping("/{id}")
-    ResponseEntity<?> deleteOrganizacao(@PathVariable UUID id) {
-        return organizacaoService.deletarOrganizacao(id);
-    }
+
+
 }
