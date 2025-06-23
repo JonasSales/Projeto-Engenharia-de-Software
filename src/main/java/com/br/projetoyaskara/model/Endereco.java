@@ -30,6 +30,12 @@ public class Endereco {
     @Column(length = 100, nullable = false)
     private String cidade;
 
+    @NotBlank(message = "Latitude é obrigatória")
+    double latitude;
+
+    @NotBlank(message = "Longitude é obrigatário")
+    double longitude;
+
     @NotBlank(message = "Estado é obrigatório")
     @Size(min = 2, max = 2, message = "Estado deve conter 2 caracteres")
     @Column(length = 2, nullable = false)

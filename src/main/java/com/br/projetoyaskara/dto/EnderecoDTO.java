@@ -44,4 +44,10 @@ public class EnderecoDTO {
     @Pattern(regexp = "\\d{5}-\\d{3}", message = "Formato de CEP inválido. Use XXXXX-YYY.")
     private String cep;
 
+    @NotBlank(message = "Latitude é obrigatória")
+    double latitude;
+
+    @NotBlank(message = "Longitude é obrigatário")
+    double longitude;
+
 }
