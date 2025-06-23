@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -34,7 +33,6 @@ public class OrganizacaoDTO {
     @Pattern(regexp = "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}", message = "Formato de CNPJ inválido. Use XX.XXX.XXX/YYYY-ZZ.")
     private String cnpj;
 
-    @NotNull(message = "O endereço da organização não pode ser nulo.")
     @Valid
     private Endereco endereco;
 
