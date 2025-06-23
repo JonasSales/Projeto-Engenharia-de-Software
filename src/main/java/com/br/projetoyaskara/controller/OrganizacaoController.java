@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,39 +25,36 @@ public class OrganizacaoController {
 
     @PreAuthorize("hasAnyAuthority('organization::create')")
     @PostMapping()
-    ResponseEntity<?> registerOrganizacao(Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+    ResponseEntity<OrganizacaoDTO> registerOrganizacao(Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
         return organizacaoService.registrarOrganizacao(authentication,organizacaoDTO);
     }
 
     @PreAuthorize("hasAnyAuthority('organization::put')")
     @PutMapping()
-    ResponseEntity<?> updateOrganizacao(Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+    ResponseEntity<OrganizacaoDTO> updateOrganizacao(Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
         return organizacaoService.updateOrganizacao(authentication, organizacaoDTO);
     }
 
     @PreAuthorize("hasAnyAuthority('organization::delete')")
     @DeleteMapping("/{id}")
-    ResponseEntity<?> deleteOrganizacao(Authentication authentication,@PathVariable UUID id) {
+    ResponseEntity<Void> deleteOrganizacao(Authentication authentication,@PathVariable UUID id) {
         return organizacaoService.deletarOrganizacao(authentication, id);
     }
 
     @GetMapping()
-    ResponseEntity<?> getAllOrganizacao() {
+    ResponseEntity<List<OrganizacaoDTO>> getAllOrganizacao() {
         return organizacaoService.getAllOrganizacoes();
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<?> getOrganizacaoByName(@PathVariable String name) {
+    public ResponseEntity<List<OrganizacaoDTO>> getOrganizacaoByName(@PathVariable String name) {
         return organizacaoService.getOrganizacaoByName(name);
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getOrganizacaoById(@PathVariable UUID id) {
+    public ResponseEntity<OrganizacaoDTO> getOrganizacaoById(@PathVariable UUID id) {
         return organizacaoService.getOrganizacaoById(id);
     }
-
-
-
 
 }
