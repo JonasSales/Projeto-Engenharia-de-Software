@@ -42,9 +42,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro de integridade de dados");
+    public ResponseEntity<Map<String, String>> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        String message = ex.getMostSpecificCause().getMessage();
+
+        Map<String, String> error = new HashMap<>();
+
+        if (message != null && message.contains("Duplicate entry")) {
+            String valorDuplicado = message.split("'")[1];
+            error.put("erro", "Já existe um registro com o valor " +  valorDuplicado + ".");
+        } else {
+            error.put("erro", "Erro de integridade dos dados. Verifique os campos e tente novamente.");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+
 
     @ExceptionHandler(InternalAuthenticationServiceException.class)
     public ResponseEntity<String> handleInternalAuthenticationServiceException(InternalAuthenticationServiceException ex) {
