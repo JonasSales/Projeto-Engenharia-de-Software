@@ -4,7 +4,6 @@ package com.br.projetoyaskara.config;
 import com.br.projetoyaskara.repository.UserRepository;
 import com.br.projetoyaskara.service.TokenService;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -34,7 +33,7 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+                                    @NonNull FilterChain filterChain) throws  IOException {
         try {
             String token = this.recoverToken(request);
             if (token != null) {
