@@ -4,7 +4,6 @@ package com.br.projetoyaskara.controller;
 import com.br.projetoyaskara.dto.OrganizacaoDTO;
 import com.br.projetoyaskara.service.OrganizacaoService;
 import jakarta.validation.Valid;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -25,13 +24,15 @@ public class OrganizacaoController {
 
     @PreAuthorize("hasAnyAuthority('organization::create')")
     @PostMapping()
-    ResponseEntity<OrganizacaoDTO> registerOrganizacao(Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+    ResponseEntity<OrganizacaoDTO> registerOrganizacao(
+            Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) {
         return organizacaoService.registrarOrganizacao(authentication,organizacaoDTO);
     }
 
     @PreAuthorize("hasAnyAuthority('organization::put')")
     @PutMapping()
-    ResponseEntity<OrganizacaoDTO> updateOrganizacao(Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) throws BadRequestException {
+    ResponseEntity<OrganizacaoDTO> updateOrganizacao(
+            Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) {
         return organizacaoService.updateOrganizacao(authentication, organizacaoDTO);
     }
 
