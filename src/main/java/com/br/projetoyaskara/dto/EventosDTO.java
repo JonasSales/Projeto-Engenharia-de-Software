@@ -40,7 +40,7 @@ public class EventosDTO {
     @NotNull(message = "Organização é obrigatória.")
     private UUID organizacaoId;
     @Valid
-    @NotNull(message = "Endereço é obrigatório.")
+
     private Endereco endereco;
 
 }
