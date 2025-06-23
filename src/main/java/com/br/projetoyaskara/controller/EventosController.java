@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -58,7 +59,7 @@ public class EventosController {
     }
 
     @GetMapping("/organizacao/id/{organizacaoId}")
-    public ResponseEntity<?> buscarEventosPorOrganizacaoId(@PathVariable UUID organizacaoId) {
+    public ResponseEntity<List<EventosDTO>> buscarEventosPorOrganizacaoId(@PathVariable UUID organizacaoId) {
         return eventosService.buscarEventosPorOrganizacaoId(organizacaoId);
     }
 
@@ -68,12 +69,7 @@ public class EventosController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<?> buscarEventosPorStatus(@PathVariable String status) {
+    public ResponseEntity<List<EventosDTO>> buscarEventosPorStatus(@PathVariable String status) {
         return eventosService.buscarEventosPorStatus(status);
-    }
-
-    @GetMapping("/{eventoId}/nota-media")
-    public ResponseEntity<?> notaMediaEvento(@PathVariable long eventoId) {
-        return eventosService.notaMediaEvento(eventoId);
     }
 }
