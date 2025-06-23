@@ -15,6 +15,8 @@ public final class Utils {
         destino.setEstado(origem.getEstado());
         destino.setComplemento(origem.getComplemento());
         destino.setCidade(origem.getCidade());
+        destino.setLatitude(origem.getLatitude());
+        destino.setLongitude(origem.getLongitude());
     }
 
 }
