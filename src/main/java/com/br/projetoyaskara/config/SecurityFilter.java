@@ -54,6 +54,8 @@ public class SecurityFilter extends OncePerRequestFilter {
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Token expirado ou inválido.\"}");
             response.getWriter().flush();
+        } catch (Exception ex) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
