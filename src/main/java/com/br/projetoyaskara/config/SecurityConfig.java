@@ -54,6 +54,7 @@ public class SecurityConfig  {
                         .requestMatchers(HttpMethod.GET, "/ingressos/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET ,"/organizacao").permitAll()
+                        .requestMatchers(HttpMethod.GET ,"/organizacao/**").permitAll()
                         .anyRequest().authenticated()
                 ).addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
