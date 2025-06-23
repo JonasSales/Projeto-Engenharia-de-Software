@@ -7,6 +7,7 @@ import com.br.projetoyaskara.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -25,19 +26,24 @@ public class UserController {
         return userService.RegisterUser(clientUser);
     }
 
-    @DeleteMapping("/{email}")
-    public ResponseEntity<?> deletarUser(@PathVariable String email) {
-        return userService.deletarUser(email);
+    @DeleteMapping()
+    public ResponseEntity<?> deletarUser(Authentication authentication) {
+        return userService.deletarUser(authentication);
     }
 
     @PutMapping()
-    public ResponseEntity<?> atualizarUser(@Valid @RequestBody ClientUserDTO clientUserDTO) {
-        return userService.atualizarUser(clientUserDTO);
+    public ResponseEntity<?> atualizarUser(Authentication authentication ,@Valid @RequestBody ClientUserDTO clientUserDTO) {
+        return userService.atualizarUser(authentication ,clientUserDTO);
     }
 
     @GetMapping("/verify")
     public ResponseEntity<?> verify(@Param("code") String code) throws ConflictException {
         return userService.verifyUser(code);
+    }
+
+    @GetMapping()
+    public ResponseEntity<ClientUserDTO> getUserProfile(Authentication authentication) {
+        return userService.getProfile(authentication);
     }
 
 }

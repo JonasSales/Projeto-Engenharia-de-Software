@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.br.projetoyaskara.repository.EnderecoRepository;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -87,9 +88,9 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<String> deletarUser(String email) {
+    public ResponseEntity<String> deletarUser(Authentication authentication) {
         try {
-            ClientUser clientUser = findClientUserByEmailOrThrow(email);
+            ClientUser clientUser = findClientUserByEmailOrThrow(authentication.getName());
             userRepository.delete(clientUser);
             return ResponseEntity.status(HttpStatus.OK).body("Conta deletada com sucesso.");
         } catch (ResourceNotFoundException e) {
@@ -121,11 +122,12 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<ClientUserDTO> atualizarUser(ClientUserDTO clientUserDTO) {
+    public ResponseEntity<ClientUserDTO> atualizarUser(Authentication authentication,ClientUserDTO clientUserDTO) {
         try {
-            ClientUser clientUserAtualizado = findClientUserByEmailOrThrow(clientUserDTO.getEmail());
+            ClientUser clientUserAtualizado = findClientUserByEmailOrThrow(authentication.getName());
 
             clientUserAtualizado.setName(clientUserDTO.getName());
+            clientUserAtualizado.setEmail(clientUserDTO.getEmail());
             clientUserAtualizado.setModified(LocalDateTime.now());
             ClientUser updatedUser = userRepository.save(clientUserAtualizado);
             return ResponseEntity.status(HttpStatus.OK).body(clientUserMapper.clientUserToClientUserDTO(updatedUser));
@@ -140,4 +142,15 @@ public class UserService {
         }
     }
 
+    public ResponseEntity<ClientUserDTO> getProfile(Authentication authentication) {
+        try {
+            ClientUser clientUser = findClientUserByEmailOrThrow(authentication.getName());
+            return ResponseEntity.ok(clientUserMapper.clientUserToClientUserDTO(clientUser));
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Erro inesperado ao buscar perfil do usuário: " + e.getMessage());
+            throw new RuntimeException("Erro interno ao buscar perfil do usuário.");
+        }
+    }
 }
