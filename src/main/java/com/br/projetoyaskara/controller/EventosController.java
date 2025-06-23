@@ -5,6 +5,7 @@ import com.br.projetoyaskara.service.EventosService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,14 +23,16 @@ public class EventosController {
 
     @PreAuthorize("hasAnyAuthority('organization::create')")
     @PostMapping
-    public ResponseEntity<?> cadastrarEvento(@Valid @RequestBody EventosDTO eventosDTO) {
-        return eventosService.cadastrarEvento(eventosDTO);
+    public ResponseEntity<?> cadastrarEvento(Authentication authentication,
+                                             @Valid @RequestBody EventosDTO eventosDTO) {
+        return eventosService.cadastrarEvento(authentication, eventosDTO);
     }
 
     @PreAuthorize("hasAnyAuthority('organization::put')")
     @PutMapping
-    public ResponseEntity<?> atualizarEvento(@Valid @RequestBody EventosDTO eventosDTO) {
-        return eventosService.atualizarEvento(eventosDTO);
+    public ResponseEntity<?> atualizarEvento(Authentication authentication,
+                                             @Valid @RequestBody EventosDTO eventosDTO) {
+        return eventosService.atualizarEvento(authentication, eventosDTO);
     }
 
     @GetMapping
@@ -39,8 +42,8 @@ public class EventosController {
 
     @PreAuthorize("hasAnyAuthority('organization::delete')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletarEvento(@PathVariable long id) {
-        return eventosService.deletarEvento(id);
+    public ResponseEntity<?> deletarEvento(Authentication authentication,@PathVariable long id) {
+        return eventosService.deletarEvento(authentication, id);
     }
 
     @GetMapping("/{id}")

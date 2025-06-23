@@ -5,11 +5,12 @@ import com.br.projetoyaskara.exception.ResourceNotFoundException;
 import com.br.projetoyaskara.mapper.EventosMapper;
 import com.br.projetoyaskara.model.Eventos;
 import com.br.projetoyaskara.model.Organizacao;
-import com.br.projetoyaskara.repository.EnderecoRepository;
 import com.br.projetoyaskara.repository.EventosRepository;
 import com.br.projetoyaskara.repository.OrganizacaoRepository;
+import com.br.projetoyaskara.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,17 +21,18 @@ public class EventosService {
 
     private final EventosMapper eventosMapper;
     private final EventosRepository eventosRepository;
-    private final EnderecoRepository enderecoRepository;
     private final OrganizacaoRepository organizacaoRepository;
+    private final UserRepository userRepository;
 
     public EventosService(
-            EventosMapper eventosMapper, EventosRepository eventosRepository,
-            EnderecoRepository enderecoRepository,
-            OrganizacaoRepository organizacaoRepository) {
+            EventosMapper eventosMapper,
+            EventosRepository eventosRepository,
+            OrganizacaoRepository organizacaoRepository,
+            UserRepository userRepository) {
         this.eventosMapper = eventosMapper;
         this.eventosRepository = eventosRepository;
-        this.enderecoRepository = enderecoRepository;
         this.organizacaoRepository = organizacaoRepository;
+        this.userRepository = userRepository;
     }
 
     private Eventos findEventoOrThrow(Long eventoId) {
@@ -42,20 +44,30 @@ public class EventosService {
                 .findById(organizacaoId).orElseThrow(() -> new ResourceNotFoundException("Organizaca não encontrada"));
     }
 
-    public ResponseEntity<EventosDTO> cadastrarEvento(EventosDTO eventosDTO) {
+    public ResponseEntity<EventosDTO> cadastrarEvento(Authentication authentication,EventosDTO eventosDTO) {
             Organizacao organizacao = findOrganizacaoOrThrow(eventosDTO.getOrganizacaoId());
-            if (eventosDTO.getEndereco() != null) {
-                enderecoRepository.save(eventosDTO.getEndereco());
+            UUID userId = userRepository.findIdByEmail(authentication.getName());
+
+            if (!organizacao.getProprietario().getId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
+
             Eventos evento = eventosMapper.toEntity(eventosDTO);
             evento.setOrganizacao(organizacao);
             Eventos eventoSalvo = eventosRepository.save(evento);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(eventosMapper.toDTO(eventoSalvo));
     }
 
 
-    public ResponseEntity<EventosDTO> atualizarEvento(EventosDTO eventosDTO) {
+    public ResponseEntity<EventosDTO> atualizarEvento(Authentication authentication, EventosDTO eventosDTO) {
             Eventos eventoAtualizado = findEventoOrThrow(eventosDTO.getId());
+            Organizacao organizacao = findOrganizacaoOrThrow(eventosDTO.getOrganizacaoId());
+            UUID userId = userRepository.findIdByEmail(authentication.getName());
+
+            if (!organizacao.getProprietario().getId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
 
             eventoAtualizado.setName(eventosDTO.getName());
             eventoAtualizado.setDescricao(eventosDTO.getDescricao());
@@ -67,20 +79,25 @@ public class EventosService {
                     .status(HttpStatus.OK).body(eventosMapper.toDTO(eventosRepository.save(eventoAtualizado)));
     }
 
-    public ResponseEntity<List<EventosDTO>> listarEventos() {
-        List<Eventos> eventos = eventosRepository.findAll();
-        return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
+    public ResponseEntity<Void> deletarEvento(Authentication authentication,long id) {
+        Eventos evento = findEventoOrThrow(id);
+        Organizacao organizacao = findOrganizacaoOrThrow(evento.getOrganizacao().getId());
+        UUID userId = userRepository.findIdByEmail(authentication.getName());
+
+        if (!organizacao.getProprietario().getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        eventosRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
-    public ResponseEntity<Void> deletarEvento(long id) {
-            findEventoOrThrow(id);
-            eventosRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<List<EventosDTO>> listarEventos() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventosRepository.findAll()));
     }
 
     public ResponseEntity<EventosDTO> buscarEventoPorId(long id) {
-            Eventos eventos = findEventoOrThrow(id);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
+            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(findEventoOrThrow(id)));
     }
 
     public ResponseEntity<List<EventosDTO>> buscarEventosPorNomeDaOrganizacao(String nomeDaOrganizacao) {
