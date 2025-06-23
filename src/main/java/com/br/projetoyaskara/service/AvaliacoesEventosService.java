@@ -7,7 +7,6 @@ import com.br.projetoyaskara.model.AvaliacoesEventos;
 import com.br.projetoyaskara.repository.AvaliacoesEventosRepository;
 import com.br.projetoyaskara.repository.EventosRepository;
 import com.br.projetoyaskara.repository.UserRepository;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
