@@ -4,9 +4,10 @@ import com.br.projetoyaskara.dto.AvaliacaoEventosDTO;
 import com.br.projetoyaskara.service.AvaliacoesEventosService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import java.util.List;
 
 
 @RequestMapping("/avaliacoes")
@@ -20,29 +21,31 @@ public class AvaliacoesEventosController {
     }
 
     @PostMapping
-    public ResponseEntity<?> salvarAvaliacao(@Valid @RequestBody AvaliacaoEventosDTO avaliacoesEventos){
-        return avaliacoesEventosService.save(avaliacoesEventos);
+    public ResponseEntity<AvaliacaoEventosDTO> salvarAvaliacao(Authentication authentication,
+                                             @Valid @RequestBody AvaliacaoEventosDTO avaliacoesEventos){
+        return avaliacoesEventosService.save(authentication,avaliacoesEventos);
     }
 
     @PutMapping
-    public ResponseEntity<?> atualizarAvaliacaoEventos(@Valid @RequestBody AvaliacaoEventosDTO avaliacoesEventos){
-        return avaliacoesEventosService.update(avaliacoesEventos);
+    public ResponseEntity<AvaliacaoEventosDTO> atualizarAvaliacaoEventos(Authentication authentication ,
+                                                       @Valid @RequestBody AvaliacaoEventosDTO avaliacoesEventos){
+        return avaliacoesEventosService.update(authentication,avaliacoesEventos);
     }
 
     @DeleteMapping("/{idAvalicao}")
-    public ResponseEntity<?> deletarAvalicaoEventos(@PathVariable long idAvalicao){
-        return avaliacoesEventosService.deleteById(idAvalicao);
+    public ResponseEntity<Void> deletarAvalicaoEventos(Authentication authentication,
+                                                    @PathVariable long idAvalicao){
+        return avaliacoesEventosService.deleteById(authentication,idAvalicao);
     }
 
     @GetMapping("/{idEvento}")
-    public ResponseEntity<?> buscarAvaliacoesPorEvento(@PathVariable long idEvento) {
+    public ResponseEntity<List<AvaliacaoEventosDTO>> buscarAvaliacoesPorEvento(@PathVariable long idEvento) {
         return avaliacoesEventosService.avaliacoesPorIdEvento(idEvento);
     }
 
-    @GetMapping("/cliente/{id}")
-    public ResponseEntity<?> buscarAvaliacoesPorCliente(@PathVariable UUID id) {
-        return avaliacoesEventosService.avaliacoesPorClientUserId(id);
+
+    @GetMapping()
+    public ResponseEntity<List<AvaliacaoEventosDTO>> buscarAvaliacoesPorCliente(Authentication authentication) {
+        return avaliacoesEventosService.avaliacoesPorUser(authentication);
     }
-
-
 }
