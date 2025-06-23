@@ -18,4 +18,7 @@ public interface UserRepository extends CrudRepository<ClientUser, UUID> {
     @Query("SELECT COUNT(u) > 0 FROM ClientUser u WHERE u.email = :email")
     boolean existsByEmail(@Param("email") String email);
 
+    @Query("SELECT c.id FROM ClientUser c WHERE c.email = :email")
+    UUID findIdByEmail(@Param("email") String email);
+
 }
