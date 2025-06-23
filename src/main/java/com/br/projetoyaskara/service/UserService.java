@@ -101,27 +101,6 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<String> verifyUser(String verificationToken) throws ConflictException {
-        try {
-            ClientUser clientUser = userRepository.findByToken(verificationToken);
-            if (clientUser == null) {
-                throw new BadRequestException("Token de verificação inválido ou expirado.");
-            }
-            if (clientUser.isActive()) {
-                throw new ConflictException("Usuário já verificado.");
-            }
-            clientUser.setToken(null);
-            clientUser.setActive(true);
-            userRepository.save(clientUser);
-            return ResponseEntity.status(HttpStatus.OK).body("Verificação realizada com sucesso.");
-        } catch (BadRequestException | ConflictException e) {
-            throw e;
-        } catch (Exception e) {
-            System.err.println("Erro inesperado ao verificar usuário: " + e.getMessage());
-            throw new RuntimeException("Erro interno ao verificar usuário.");
-        }
-    }
-
     public ResponseEntity<ClientUserDTO> atualizarUser(Authentication authentication,ClientUserDTO clientUserDTO) {
         try {
             ClientUser clientUserAtualizado = findClientUserByEmailOrThrow(authentication.getName());
@@ -151,6 +130,27 @@ public class UserService {
         } catch (Exception e) {
             System.err.println("Erro inesperado ao buscar perfil do usuário: " + e.getMessage());
             throw new RuntimeException("Erro interno ao buscar perfil do usuário.");
+        }
+    }
+
+    public ResponseEntity<String> verifyUser(String verificationToken) throws ConflictException {
+        try {
+            ClientUser clientUser = userRepository.findByToken(verificationToken);
+            if (clientUser == null) {
+                throw new BadRequestException("Token de verificação inválido ou expirado.");
+            }
+            if (clientUser.isActive()) {
+                throw new ConflictException("Usuário já verificado.");
+            }
+            clientUser.setToken(null);
+            clientUser.setActive(true);
+            userRepository.save(clientUser);
+            return ResponseEntity.status(HttpStatus.OK).body("Verificação realizada com sucesso.");
+        } catch (BadRequestException | ConflictException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Erro inesperado ao verificar usuário: " + e.getMessage());
+            throw new RuntimeException("Erro interno ao verificar usuário.");
         }
     }
 }
