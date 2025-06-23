@@ -14,7 +14,11 @@ public interface AvaliacoesEventosRepository extends JpaRepository<AvaliacoesEve
 
     List<AvaliacoesEventos> findAvaliacoesEventosByEventoId(long evento);
 
-    List<AvaliacoesEventos> findAvaliacoesEventosByClientUserId(UUID clientUser_id);
+    @Query("select a from AvaliacoesEventos a where a.clientUser.email = :email")
+    List<AvaliacoesEventos> findAvaliacoesEventosByClientUserEmail(@Param("email") String email);
+
+    @Query("select a from AvaliacoesEventos a where (a.clientUser.id = :idClient and a.evento.id =: eventoId)")
+    List<AvaliacoesEventos> avaliacoesDoClientPorEvento(@Param("email") UUID idClient, @Param("eventoId") Long eventoId);
 
     @Query("SELECT AVG(a.nota) FROM AvaliacoesEventos a WHERE a.evento.id = :eventoId")
     Double notaMediaEvento(@Param("eventoId") long eventoId);
