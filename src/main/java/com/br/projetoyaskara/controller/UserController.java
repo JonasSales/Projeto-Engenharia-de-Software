@@ -27,22 +27,22 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> register(@Valid @RequestBody ClientUser clientUser) throws ConflictException {
+    public ResponseEntity<ClientUserDTO> register(@Valid @RequestBody ClientUser clientUser) throws ConflictException {
         return userService.RegisterUser(clientUser);
     }
 
     @DeleteMapping()
-    public ResponseEntity<?> deletarUser(Authentication authentication) {
+    public ResponseEntity<String> deletarUser(Authentication authentication) {
         return userService.deletarUser(authentication);
     }
 
     @PutMapping()
-    public ResponseEntity<?> atualizarUser(Authentication authentication ,@Valid @RequestBody ClientUserDTO clientUserDTO) {
+    public ResponseEntity<ClientUserDTO> atualizarUser(Authentication authentication ,@Valid @RequestBody ClientUserDTO clientUserDTO) {
         return userService.atualizarUser(authentication ,clientUserDTO);
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<?> verify(@Param("code") String code) throws ConflictException {
+    public ResponseEntity<String> verify(@Param("code") String code) throws ConflictException {
         return userService.verifyUser(code);
     }
 
