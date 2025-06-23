@@ -4,11 +4,14 @@ import com.br.projetoyaskara.dto.ClientUserDTO;
 import com.br.projetoyaskara.exception.ConflictException;
 import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.UnsupportedEncodingException;
 
 
 @RestController
@@ -27,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<ClientUserDTO> register(@Valid @RequestBody ClientUser clientUser) throws ConflictException {
+    public ResponseEntity<ClientUserDTO> register(@Valid @RequestBody ClientUser clientUser) throws MessagingException, UnsupportedEncodingException {
         return userService.RegisterUser(clientUser);
     }
 
