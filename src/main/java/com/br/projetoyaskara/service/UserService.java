@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Service
@@ -106,5 +107,12 @@ public class UserService {
             clientUser.setActive(true);
             userRepository.save(clientUser);
             return ResponseEntity.status(HttpStatus.OK).body("Verificação realizada com sucesso.");
+    }
+
+    public ResponseEntity<String> changeToOrganization(Authentication authentication) {
+        UUID clientId = userRepository.findIdByEmail(authentication.getName());
+        userRepository.changeRoleAccountToOrganization(clientId);
+        return ResponseEntity.ok("Atualizado role com sucesso");
+
     }
 }

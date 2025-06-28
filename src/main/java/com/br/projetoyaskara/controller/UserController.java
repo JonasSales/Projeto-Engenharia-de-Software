@@ -49,4 +49,9 @@ public class UserController {
         return userService.verifyUser(code);
     }
 
+    @PostMapping("/change")
+    public ResponseEntity<String> changeUserToOrganization(Authentication authentication) {
+        return userService.changeToOrganization(authentication);
+    }
+
 }

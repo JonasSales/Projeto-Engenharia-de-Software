@@ -1,6 +1,8 @@
 package com.br.projetoyaskara.repository;
 
 import com.br.projetoyaskara.model.clientuser.ClientUser;
+import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -20,5 +22,12 @@ public interface UserRepository extends CrudRepository<ClientUser, UUID> {
 
     @Query("SELECT c.id FROM ClientUser c WHERE c.email = :email")
     UUID findIdByEmail(@Param("email") String email);
+
+
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ClientUser c SET c.role = 'ORGANIZATION' WHERE c.id = :idClient")
+    void changeRoleAccountToOrganization(@Param("idClient") UUID idClient);
 
 }
