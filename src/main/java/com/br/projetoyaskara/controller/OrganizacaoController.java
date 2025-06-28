@@ -58,4 +58,10 @@ public class OrganizacaoController {
         return organizacaoService.getOrganizacaoById(id);
     }
 
+    @PreAuthorize("hasAnyAuthority('organization::read')")
+    @GetMapping("/organizations")
+    public ResponseEntity<List<OrganizacaoDTO>> findAllOrganizacaoByProprietario(Authentication authentication) {
+        return organizacaoService.getOrganizacoesByIdProprietario(authentication);
+    }
+
 }

@@ -105,4 +105,11 @@ public class OrganizacaoService {
             return ResponseEntity.ok(organizacaoMapper.toDTO(organizacoes));
     }
 
+    public ResponseEntity<List<OrganizacaoDTO>> getOrganizacoesByIdProprietario(Authentication authentication) {
+        UUID idProprietario = userRepository.findIdByEmail(authentication.getName());
+        List<Organizacao> organizacoes = organizacaoRepository.findAllOrganizationByIdProprietario(idProprietario);
+        return  ResponseEntity.ok(organizacaoMapper.toDTO(organizacoes));
+
+    }
+
 }
