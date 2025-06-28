@@ -1,5 +1,6 @@
 package com.br.projetoyaskara.dto;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,10 +45,10 @@ public class EnderecoDTO {
     @Pattern(regexp = "\\d{5}-\\d{3}", message = "Formato de CEP inválido. Use XXXXX-YYY.")
     private String cep;
 
-    @NotBlank(message = "Latitude é obrigatória")
+    @NotNull(message = "Latitude é obrigatória")
     double latitude;
 
-    @NotBlank(message = "Longitude é obrigatário")
+    @NotNull(message = "Longitude é obrigatário")
     double longitude;
 
 }

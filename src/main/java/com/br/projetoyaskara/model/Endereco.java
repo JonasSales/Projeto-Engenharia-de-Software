@@ -2,6 +2,7 @@ package com.br.projetoyaskara.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,10 +31,10 @@ public class Endereco {
     @Column(length = 100, nullable = false)
     private String cidade;
 
-    @NotBlank(message = "Latitude é obrigatória")
+    @NotNull(message = "Latitude é obrigatória")
     double latitude;
 
-    @NotBlank(message = "Longitude é obrigatário")
+    @NotNull(message = "Longitude é obrigatário")
     double longitude;
 
     @NotBlank(message = "Estado é obrigatório")
