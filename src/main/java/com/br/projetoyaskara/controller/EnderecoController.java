@@ -45,10 +45,10 @@ public class EnderecoController {
 
     // ===================== EVENTO =====================
 
-    @PostMapping("/evento")
+    @PostMapping("/evento/{idEvento}")
     public ResponseEntity<EnderecoDTO> cadastrarEnderecoEvento(Authentication authentication,
                                                                @Valid @RequestBody EnderecoDTO enderecoDTO,
-                                                               @RequestParam("idEvento") long idEvento) {
+                                                               @PathVariable("idEvento") long idEvento) {
         return enderecoService.cadastrarEnderecoEvento(authentication, enderecoDTO, idEvento);
     }
 
@@ -73,10 +73,10 @@ public class EnderecoController {
 
     // ===================== ORGANIZAÇÃO =====================
 
-    @PostMapping("/organizacao")
+    @PostMapping("/organizacao/{idOrganizacao}")
     public ResponseEntity<EnderecoDTO> cadastrarEnderecoOrganizacao(Authentication authentication,
                                                                     @Valid @RequestBody EnderecoDTO enderecoDTO,
-                                                                    @RequestParam("idOrganizacao") UUID idOrganizacao) {
+                                                                    @PathVariable("idOrganizacao") UUID idOrganizacao) {
 
         return enderecoService.cadastrarEnderecoOrganizacao(authentication, idOrganizacao, enderecoDTO);
     }

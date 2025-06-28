@@ -2,6 +2,7 @@ package com.br.projetoyaskara.model.clientuser;
 
 import com.br.projetoyaskara.model.AvaliacoesEventos;
 import com.br.projetoyaskara.model.Endereco;
+import com.br.projetoyaskara.model.Organizacao;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -58,6 +59,9 @@ public class ClientUser implements UserDetails {
 
     @OneToMany(mappedBy = "clientUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AvaliacoesEventos> avaliacoes;
+
+    @OneToMany(mappedBy = "proprietario", cascade = CascadeType.REMOVE)
+    private List<Organizacao> organizacoes;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "endereco_id")

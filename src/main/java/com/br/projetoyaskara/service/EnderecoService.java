@@ -65,9 +65,9 @@ public class EnderecoService {
 
         Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
         clientUser.setEndereco(endereco);
-        userRepository.save(clientUser);
+        ClientUser atualizado = userRepository.save(clientUser);
 
-        return ResponseEntity.ok(enderecoMapper.toDto(endereco));
+        return ResponseEntity.ok(enderecoMapper.toDto(atualizado.getEndereco()));
     }
 
     public ResponseEntity<EnderecoDTO> atualizarEnderecoClient(Authentication authentication, EnderecoDTO enderecoDTO) {
