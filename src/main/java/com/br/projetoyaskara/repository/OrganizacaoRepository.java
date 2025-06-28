@@ -18,4 +18,8 @@ public interface OrganizacaoRepository extends JpaRepository<Organizacao, UUID> 
     @Query("select o from Organizacao o where o.proprietario.id = :idProprietario")
     List<Organizacao> findAllOrganizationByIdProprietario(@Param("idProprietario") UUID idProprietario);
 
+    Organizacao findOrganizacaoByEnderecoId(long id);
+
+    @Query("SELECT o.id FROM Organizacao o WHERE o.id = :idEvento")
+    UUID findOrganizacaoByEventosId(@Param("idEvento") long idEvento);
 }

@@ -25,4 +25,6 @@ public interface EventosRepository extends JpaRepository<Eventos, Long> {
     List<Eventos> findAllByFaixaEtaria(Eventos.FaixaEtaria faixaEtaria);
 
     List<Eventos> findAllByStatus(Eventos.Status status);
+
+    Eventos findEventosByEnderecoId(long enderecoId);
 }
