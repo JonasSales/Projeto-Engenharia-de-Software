@@ -53,17 +53,21 @@ public class EnderecoService {
     }
 
 
-    public ResponseEntity<EnderecoDTO> cadastrarEnderecoClient(Authentication authentication,EnderecoDTO enderecoDTO) {
+    public ResponseEntity<EnderecoDTO> cadastrarEnderecoClient(Authentication authentication, EnderecoDTO enderecoDTO) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
 
-        if (!(clientUser.getEndereco() == null)) {
+        if (clientUser.getEndereco() != null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
         clientUser.setEndereco(endereco);
-        userRepository.save(clientUser);
-        return ResponseEntity.ok(enderecoMapper.toDto(clientUser.getEndereco()));
+        userRepository.save(clientUser); // salva o usuário e também o endereço via cascade
+
+        return ResponseEntity.ok(enderecoMapper.toDto(endereco));
     }
+
+
 
     public ResponseEntity<EnderecoDTO> atualizarEnderecoClient(Authentication authentication, EnderecoDTO enderecoDTO) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
@@ -105,10 +109,10 @@ public class EnderecoService {
 
         Eventos evento = findEventosOrThrow(endereco.getId());
 
-        if (!(evento.getEndereco() == null)) {
+        if (evento.getEndereco() != null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
+
         evento.setEndereco(endereco);
         eventosRepository.save(evento);
 
@@ -169,7 +173,7 @@ public class EnderecoService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        if (!(organizacao.getEndereco() == null)) {
+        if (organizacao.getEndereco() != null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
