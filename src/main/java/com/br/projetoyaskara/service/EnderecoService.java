@@ -55,11 +55,14 @@ public class EnderecoService {
 
     public ResponseEntity<EnderecoDTO> cadastrarEnderecoClient(Authentication authentication,EnderecoDTO enderecoDTO) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
+
+        if (!(clientUser.getEndereco() == null)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
         clientUser.setEndereco(endereco);
         userRepository.save(clientUser);
-        enderecoRepository.save(endereco);
-        return ResponseEntity.ok(enderecoMapper.toDto(endereco));
+        return ResponseEntity.ok(enderecoMapper.toDto(clientUser.getEndereco()));
     }
 
     public ResponseEntity<EnderecoDTO> atualizarEnderecoClient(Authentication authentication, EnderecoDTO enderecoDTO) {
@@ -76,14 +79,12 @@ public class EnderecoService {
         return ResponseEntity.ok(enderecoMapper.toDto(findEnderecoOrThrow(clientUser.getEndereco().getId())));
     }
 
-    public ResponseEntity<String> deletarEnderecoClient( Authentication authentication) {
+    public ResponseEntity<String> deletarEnderecoClient(Authentication authentication) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
         Endereco endereco = findEnderecoOrThrow(clientUser.getEndereco().getId());
-        enderecoRepository.delete(endereco);
-
         clientUser.setEndereco(null);
         userRepository.save(clientUser);
-
+        enderecoRepository.delete(endereco);
         return ResponseEntity.ok("Endereço deletado");
     }
 
@@ -100,9 +101,14 @@ public class EnderecoService {
         }
 
         Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
-        enderecoRepository.save(endereco);
+
 
         Eventos evento = findEventosOrThrow(endereco.getId());
+
+        if (!(evento.getEndereco() == null)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
         evento.setEndereco(endereco);
         eventosRepository.save(evento);
 
@@ -163,12 +169,15 @@ public class EnderecoService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+        if (!(organizacao.getEndereco() == null)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
         enderecoRepository.save(endereco);
 
-        Eventos evento = findEventosOrThrow(endereco.getId());
-        evento.setEndereco(endereco);
-        eventosRepository.save(evento);
+        organizacao.setEndereco(endereco);
+        organizacaoRepository.save(organizacao);
 
         return ResponseEntity.ok(enderecoMapper.toDto(endereco));
     }

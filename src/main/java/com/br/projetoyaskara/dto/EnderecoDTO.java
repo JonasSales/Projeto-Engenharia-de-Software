@@ -18,13 +18,6 @@ public class EnderecoDTO {
 
     private Long id;
 
-    @NotBlank(message = "O logradouro não pode estar em branco.")
-    @Size(max = 255, message = "O logradouro não pode ter mais de 255 caracteres.")
-    private String logradouro;
-
-    @NotBlank(message = "O número não pode estar em branco.")
-    @Size(max = 20, message = "O número não pode ter mais de 20 caracteres.")
-    private String numero;
 
     @Size(max = 100, message = "O complemento não pode ter mais de 100 caracteres.")
     private String complemento;
