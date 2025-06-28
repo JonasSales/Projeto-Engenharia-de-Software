@@ -29,9 +29,19 @@ public class EnderecoService {
     private final EventosRepository eventosRepository;
     private final OrganizacaoRepository organizacaoRepository;
 
+    public EnderecoService(EnderecoRepository enderecoRepository, UserRepository userRepository,
+                           EnderecoMapper enderecoMapper, EventosRepository eventosRepository,
+                           OrganizacaoRepository organizacaoRepository) {
+        this.enderecoRepository = enderecoRepository;
+        this.userRepository = userRepository;
+        this.enderecoMapper = enderecoMapper;
+        this.eventosRepository = eventosRepository;
+        this.organizacaoRepository = organizacaoRepository;
+    }
+
     private Endereco findEnderecoOrThrow(long id) {
-        return enderecoRepository
-                .findById(id).orElseThrow(() -> new ResourceNotFoundException("Endereco não encontrado"));
+        return enderecoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Endereco não encontrado"));
     }
 
     private Eventos findEventosOrThrow(long id) {
@@ -41,36 +51,32 @@ public class EnderecoService {
 
     private Organizacao findOrganizacaoOrThrow(UUID id) {
         return organizacaoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Organização não encontrada"));
     }
 
-    public EnderecoService(EnderecoRepository enderecoRepository, UserRepository userRepository, EnderecoMapper enderecoMapper, EventosRepository eventosRepository, OrganizacaoRepository organizacaoRepository) {
-        this.enderecoRepository = enderecoRepository;
-        this.userRepository = userRepository;
-        this.enderecoMapper = enderecoMapper;
-        this.eventosRepository = eventosRepository;
-        this.organizacaoRepository = organizacaoRepository;
-    }
-
+    // ===================== CLIENTE =====================
 
     public ResponseEntity<EnderecoDTO> cadastrarEnderecoClient(Authentication authentication, EnderecoDTO enderecoDTO) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
 
         if (clientUser.getEndereco() != null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
         Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
         clientUser.setEndereco(endereco);
-        userRepository.save(clientUser); // salva o usuário e também o endereço via cascade
+        userRepository.save(clientUser);
 
         return ResponseEntity.ok(enderecoMapper.toDto(endereco));
     }
 
-
-
     public ResponseEntity<EnderecoDTO> atualizarEnderecoClient(Authentication authentication, EnderecoDTO enderecoDTO) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
+
+        if (clientUser.getEndereco() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
         Endereco enderecoDesatualizado = findEnderecoOrThrow(clientUser.getEndereco().getId());
         Endereco enderecoAtualizado = enderecoMapper.toEntity(enderecoDTO);
         atualizarEndereco(enderecoDesatualizado, enderecoAtualizado);
@@ -80,11 +86,21 @@ public class EnderecoService {
 
     public ResponseEntity<EnderecoDTO> buscarEnderecoCLient(Authentication authentication) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
+
+        if (clientUser.getEndereco() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
         return ResponseEntity.ok(enderecoMapper.toDto(findEnderecoOrThrow(clientUser.getEndereco().getId())));
     }
 
     public ResponseEntity<String> deletarEnderecoClient(Authentication authentication) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
+
+        if (clientUser.getEndereco() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não possui endereço.");
+        }
+
         Endereco endereco = findEnderecoOrThrow(clientUser.getEndereco().getId());
         clientUser.setEndereco(null);
         userRepository.save(clientUser);
@@ -92,11 +108,9 @@ public class EnderecoService {
         return ResponseEntity.ok("Endereço deletado");
     }
 
-    public ResponseEntity<EnderecoDTO> cadastrarEnderecoEvento(
-            Authentication authentication,
-            EnderecoDTO enderecoDTO,
-            long idEvento) {
+    // ===================== EVENTO =====================
 
+    public ResponseEntity<EnderecoDTO> cadastrarEnderecoEvento(Authentication authentication, EnderecoDTO enderecoDTO, long idEvento) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         UUID organizacaoId = organizacaoRepository.findOrganizacaoByEventosId(idEvento);
 
@@ -104,143 +118,60 @@ public class EnderecoService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
-
-
-        Eventos evento = findEventosOrThrow(endereco.getId());
+        Eventos evento = findEventosOrThrow(idEvento);
 
         if (evento.getEndereco() != null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
+        Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
         evento.setEndereco(endereco);
         eventosRepository.save(evento);
 
         return ResponseEntity.ok(enderecoMapper.toDto(endereco));
     }
 
-
-    public ResponseEntity<EnderecoDTO> atualizarEnderecoEvento(
-            Authentication authentication,
-            long idEvento,
-            EnderecoDTO enderecoDTO) {
-
+    public ResponseEntity<EnderecoDTO> atualizarEnderecoEvento(Authentication authentication, long idEvento, EnderecoDTO enderecoDTO) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
-        Eventos eventos = eventosRepository.findEventosByEnderecoId(idEvento);
+        Eventos evento = findEventosOrThrow(idEvento);
         UUID organizacaoId = organizacaoRepository.findOrganizacaoByEventosId(idEvento);
 
         if (!organizacaoId.equals(clientId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Endereco enderecoDesatualizado = findEnderecoOrThrow(eventos.getEndereco().getId());
+        if (evento.getEndereco() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Endereco enderecoDesatualizado = findEnderecoOrThrow(evento.getEndereco().getId());
         Endereco enderecoAtualizado = enderecoMapper.toEntity(enderecoDTO);
         atualizarEndereco(enderecoDesatualizado, enderecoAtualizado);
         enderecoRepository.save(enderecoDesatualizado);
 
         return ResponseEntity.ok(enderecoMapper.toDto(enderecoDesatualizado));
     }
-
-
-
 
     public ResponseEntity<String> deletarEnderecoEvento(Authentication authentication, long idEvento) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         UUID organizacaoId = organizacaoRepository.findOrganizacaoByEventosId(idEvento);
 
         if (!clientId.equals(organizacaoId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acesso negado.");
         }
 
-        Eventos evento = eventosRepository.findById(idEvento)
-                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
-
+        Eventos evento = findEventosOrThrow(idEvento);
         Endereco endereco = evento.getEndereco();
+
+        if (endereco == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("O evento não possui endereço.");
+        }
+
         evento.setEndereco(null);
         eventosRepository.save(evento);
-
         enderecoRepository.delete(endereco);
+
         return ResponseEntity.ok("Endereço do evento deletado");
-    }
-
-    public ResponseEntity<EnderecoDTO> cadastrarEnderecoOrganizacao(Authentication authentication,
-                                                                    UUID idOrganizacao,
-                                                                    EnderecoDTO enderecoDTO) {
-        UUID clientId = userRepository.findIdByEmail(authentication.getName());
-        Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
-
-        if (!clientId.equals(organizacao.getProprietario().getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        if (organizacao.getEndereco() != null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
-        enderecoRepository.save(endereco);
-
-        organizacao.setEndereco(endereco);
-        organizacaoRepository.save(organizacao);
-
-        return ResponseEntity.ok(enderecoMapper.toDto(endereco));
-    }
-
-    public ResponseEntity<EnderecoDTO> atualizarEnderecoOrganizacao(
-            Authentication authentication,
-            UUID idOrganizacao,
-            EnderecoDTO enderecoDTO) {
-
-        UUID clientId = userRepository.findIdByEmail(authentication.getName());
-        Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
-
-        if (!clientId.equals(organizacao.getProprietario().getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        Endereco enderecoDesatualizado = findEnderecoOrThrow(organizacao.getEndereco().getId());
-
-        Endereco enderecoAtualizado = enderecoMapper.toEntity(enderecoDTO);
-
-        atualizarEndereco(enderecoDesatualizado, enderecoAtualizado);
-
-        enderecoRepository.save(enderecoDesatualizado);
-
-        return ResponseEntity.ok(enderecoMapper.toDto(enderecoDesatualizado));
-    }
-
-
-
-    public ResponseEntity<String> deletarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao) {
-        UUID clientId = userRepository.findIdByEmail(authentication.getName());
-        Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
-
-        if (!clientId.equals(organizacao.getProprietario().getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acesso negado: você não é o proprietário da organização.");
-        }
-
-        Endereco endereco = organizacao.getEndereco();
-        organizacao.setEndereco(null);
-        organizacaoRepository.save(organizacao);
-
-        enderecoRepository.delete(endereco);
-
-        return ResponseEntity.ok("Endereço da organização deletado com sucesso.");
-    }
-
-
-
-
-    public ResponseEntity<EnderecoDTO> buscarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao) {
-        UUID clientId = userRepository.findIdByEmail(authentication.getName());
-        Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
-
-        if (!clientId.equals(organizacao.getProprietario().getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        Endereco endereco = organizacao.getEndereco();
-        return ResponseEntity.ok(enderecoMapper.toDto(endereco));
     }
 
     public ResponseEntity<EnderecoDTO> buscarEnderecoEvento(Authentication authentication, long idEvento) {
@@ -252,8 +183,88 @@ public class EnderecoService {
         }
 
         Eventos evento = findEventosOrThrow(idEvento);
-        Endereco endereco = evento.getEndereco();
+
+        if (evento.getEndereco() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(enderecoMapper.toDto(evento.getEndereco()));
+    }
+
+    // ===================== ORGANIZAÇÃO =====================
+
+    public ResponseEntity<EnderecoDTO> cadastrarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao, EnderecoDTO enderecoDTO) {
+        UUID clientId = userRepository.findIdByEmail(authentication.getName());
+        Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
+
+        if (!clientId.equals(organizacao.getProprietario().getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (organizacao.getEndereco() != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
+        enderecoRepository.save(endereco);
+        organizacao.setEndereco(endereco);
+        organizacaoRepository.save(organizacao);
+
         return ResponseEntity.ok(enderecoMapper.toDto(endereco));
     }
 
+    public ResponseEntity<EnderecoDTO> atualizarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao, EnderecoDTO enderecoDTO) {
+        UUID clientId = userRepository.findIdByEmail(authentication.getName());
+        Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
+
+        if (!clientId.equals(organizacao.getProprietario().getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (organizacao.getEndereco() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Endereco enderecoDesatualizado = findEnderecoOrThrow(organizacao.getEndereco().getId());
+        Endereco enderecoAtualizado = enderecoMapper.toEntity(enderecoDTO);
+        atualizarEndereco(enderecoDesatualizado, enderecoAtualizado);
+        enderecoRepository.save(enderecoDesatualizado);
+
+        return ResponseEntity.ok(enderecoMapper.toDto(enderecoDesatualizado));
+    }
+
+    public ResponseEntity<String> deletarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao) {
+        UUID clientId = userRepository.findIdByEmail(authentication.getName());
+        Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
+
+        if (!clientId.equals(organizacao.getProprietario().getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acesso negado: você não é o proprietário da organização.");
+        }
+
+        Endereco endereco = organizacao.getEndereco();
+        if (endereco == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("A organização não possui endereço.");
+        }
+
+        organizacao.setEndereco(null);
+        organizacaoRepository.save(organizacao);
+        enderecoRepository.delete(endereco);
+
+        return ResponseEntity.ok("Endereço da organização deletado com sucesso.");
+    }
+
+    public ResponseEntity<EnderecoDTO> buscarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao) {
+        UUID clientId = userRepository.findIdByEmail(authentication.getName());
+        Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
+
+        if (!clientId.equals(organizacao.getProprietario().getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (organizacao.getEndereco() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(enderecoMapper.toDto(organizacao.getEndereco()));
+    }
 }

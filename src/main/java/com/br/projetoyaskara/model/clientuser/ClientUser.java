@@ -59,8 +59,8 @@ public class ClientUser implements UserDetails {
     @OneToMany(mappedBy = "clientUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AvaliacoesEventos> avaliacoes;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "endereco_id", referencedColumnName = "id")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "endereco_id")
     private Endereco endereco;
 
     public ClientUser(String email, String password) {
