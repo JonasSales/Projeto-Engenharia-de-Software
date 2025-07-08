@@ -19,10 +19,11 @@ import java.util.List;
 public class Reservas {
 
     public enum Status {
-        RESERVADO,
-        PAGO,
-        CANCELADO,
-        EXPIRADO
+        PENDENTE,
+        PROCESSANDO,
+        CONCLUIDA,
+        CANCELADA,
+        EXPIRADA
     }
 
     @Id
@@ -33,18 +34,23 @@ public class Reservas {
     @JoinColumn(name = "client_id")
     private ClientUser client;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lotes_ingresso_id")
-    private LotesIngresso lotesIngresso;
+    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ItemReserva> itens;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    private LocalDateTime dataReserva;
+    private LocalDateTime dataCriacao;
 
-    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Pagamentos> pagamentos;
+    private LocalDateTime dataExpiracao;
 
+    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private TransacaoPagamento transacaoPagamento;
+
+    @PrePersist
+    protected void onCreate() {
+        dataCriacao = LocalDateTime.now();
+        dataExpiracao = LocalDateTime.now().plusMinutes(15);
+        status = Status.PENDENTE;
+    }
 }
-
-
