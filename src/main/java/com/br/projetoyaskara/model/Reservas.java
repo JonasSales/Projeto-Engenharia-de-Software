@@ -44,7 +44,7 @@ public class Reservas {
 
     private LocalDateTime dataExpiracao;
 
-    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL)
     private TransacaoPagamento transacaoPagamento;
 
     @PrePersist
