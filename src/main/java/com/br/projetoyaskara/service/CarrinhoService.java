@@ -91,18 +91,23 @@ public class CarrinhoService {
     }
 
     public ResponseEntity<String> removerItemCarrinho(Authentication authentication,
-                                                                UUID itemCarrinhoId) {
+                                                      UUID itemCarrinhoId) {
 
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         Carrinho carrinho = carrinhoRepository.findByClientUserId(clientId);
 
-        if (carrinho == null) {
-            return ResponseEntity.badRequest().build();
+        if (carrinho != null && carrinho.getClientUser().getId().equals(clientId)) {
+            boolean removed = carrinho.getItensCarrinho().removeIf(item -> item.getId().equals(itemCarrinhoId));
+
+            if (removed) {
+                carrinhoRepository.save(carrinho);
+                itemCarrinhoRepository.deleteById(itemCarrinhoId);
+                return ResponseEntity.ok("Item removido");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item não encontrado no carrinho");
+            }
         }
-        carrinho.getItensCarrinho().removeIf(item -> item.getId().equals(itemCarrinhoId));
 
-        carrinhoRepository.save(carrinho);
-
-        return ResponseEntity.ok("Item removido");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 }
