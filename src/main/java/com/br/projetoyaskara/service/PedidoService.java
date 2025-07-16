@@ -69,32 +69,4 @@ public class PedidoService {
         return ResponseEntity.ok(new PedidoResponseDTO(pedidoSalvo));
     }
 
-    @Transactional
-    public ResponseEntity<PedidoResponseDTO> atualizarStatusPagamento(UUID pedidoId,
-                                                                      TransacaoPagamento.StatusPagamento novoStatusPagamento) {
-        Pedido pedido = pedidoRepository.findById(pedidoId)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
-
-        TransacaoPagamento transacao = pedido.getTransacaoPagamento();
-        transacao.setStatus(novoStatusPagamento);
-
-        switch (novoStatusPagamento) {
-            case PAGO:
-                pedido.setStatus(Pedido.StatusPedido.PAGO);
-                transacao.setDataDePagamento(java.time.LocalDateTime.now());
-                break;
-            case FALHOU:
-                pedido.setStatus(Pedido.StatusPedido.CANCELADO);
-                break;
-            case REEMBOLSADO:
-                pedido.setStatus(Pedido.StatusPedido.REEMBOLSADO);
-                transacao.setDataDeReembolso(java.time.LocalDateTime.now());
-                break;
-            case PENDENTE:
-                pedido.setStatus(Pedido.StatusPedido.AGUARDANDO_PAGAMENTO);
-                break;
-        }
-        Pedido pedidoSalvo = pedidoRepository.save(pedido);
-        return ResponseEntity.ok(new PedidoResponseDTO(pedidoSalvo));
-    }
 }
