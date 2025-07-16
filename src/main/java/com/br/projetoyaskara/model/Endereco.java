@@ -1,5 +1,6 @@
 package com.br.projetoyaskara.model;
 
+import com.br.projetoyaskara.dto.request.EnderecoRequestDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -48,5 +49,16 @@ public class Endereco {
 
     @Column(length = 200)
     private String complemento;
+
+    public Endereco (EnderecoRequestDTO enderecoResponseDTO) {
+        this.cep = enderecoResponseDTO.getCep();
+        this.cidade = enderecoResponseDTO.getCidade();
+        this.latitude = enderecoResponseDTO.getLatitude();
+        this.longitude = enderecoResponseDTO.getLongitude();
+        this.estado = enderecoResponseDTO.getEstado();
+        this.bairro = enderecoResponseDTO.getBairro();
+        this.complemento = enderecoResponseDTO.getComplemento();
+
+    }
 }
 
