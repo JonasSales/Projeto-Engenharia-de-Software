@@ -1,6 +1,6 @@
 package com.br.projetoyaskara.controller;
 
-import com.br.projetoyaskara.dto.FaixaDePreco;
+import com.br.projetoyaskara.dto.request.FaixaDePreco;
 import com.br.projetoyaskara.dto.request.LoteIngressoCreateRequestDTO;
 import com.br.projetoyaskara.dto.request.LoteIngressoUpdateRequestDTO;
 import com.br.projetoyaskara.dto.response.LoteIngressoResponseDTO;
