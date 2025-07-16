@@ -25,6 +25,8 @@ public class ItemCarrinho {
     @JoinColumn(name = "lote_ingresso_id")
     private LotesIngresso lotesIngresso;
 
+    private int quantidade;
+
     @ManyToOne
     @JoinColumn(name = "carrinho_id")
     private Carrinho carrinho;
