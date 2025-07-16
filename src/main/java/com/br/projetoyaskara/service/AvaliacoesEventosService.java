@@ -1,12 +1,16 @@
 package com.br.projetoyaskara.service;
 
-import com.br.projetoyaskara.dto.AvaliacaoEventosDTO;
+
+import com.br.projetoyaskara.dto.request.AvaliacaoRequestDTO;
+import com.br.projetoyaskara.dto.response.AvaliacaoResponseDTO;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
-import com.br.projetoyaskara.mapper.AvaliacoesEventosMapper;
 import com.br.projetoyaskara.model.AvaliacoesEventos;
+import com.br.projetoyaskara.model.Eventos;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.repository.AvaliacoesEventosRepository;
 import com.br.projetoyaskara.repository.EventosRepository;
 import com.br.projetoyaskara.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,59 +25,76 @@ import java.util.UUID;
 @Service
 public class AvaliacoesEventosService {
 
-    private final AvaliacoesEventosMapper avaliacoesEventosMapper;
     private final AvaliacoesEventosRepository avaliacoesRepository;
     private final EventosRepository eventosRepository;
     private final UserRepository userRepository;
 
-    public AvaliacoesEventosService(AvaliacoesEventosMapper avaliacoesEventosMapper,
-                                    AvaliacoesEventosRepository avaliacoesRepository,
+    public AvaliacoesEventosService(AvaliacoesEventosRepository avaliacoesRepository,
                                     EventosRepository eventosRepository,
                                     UserRepository userRepository) {
-        this.avaliacoesEventosMapper = avaliacoesEventosMapper;
         this.avaliacoesRepository = avaliacoesRepository;
         this.eventosRepository = eventosRepository;
         this.userRepository = userRepository;
     }
 
-    private void findEventoOrThrow(Long eventoId) {
-        eventosRepository.findById(eventoId)
+    private Eventos findEventoOrThrow(UUID eventoId) {
+        return eventosRepository
+                .findById(eventoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado."));
     }
 
-    private AvaliacoesEventos findAvaliacaoOrThrow(Long avaliacaoId) {
-        return avaliacoesRepository.findById(avaliacaoId)
+    private AvaliacoesEventos findAvaliacaoOrThrow(UUID avaliacaoId) {
+        return avaliacoesRepository
+                .findById(avaliacaoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Avaliação não encontrada."));
     }
 
-    public ResponseEntity<List<AvaliacaoEventosDTO>> avaliacoesPorIdEvento(long eventoId) {
-        List<AvaliacoesEventos> avaliacoes = avaliacoesRepository.findAvaliacoesEventosByEventoId(eventoId);
-        return ResponseEntity.ok(avaliacoesEventosMapper.toDTOList(avaliacoes));
+    private ClientUser findClientUserOrThrow(UUID clientUserId) {
+        return userRepository
+                .findById(clientUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 
-    public ResponseEntity<List<AvaliacaoEventosDTO>> avaliacoesDoUsuarioDeUmEvento(Authentication authentication,long eventoId) {
+    public ResponseEntity<List<AvaliacaoResponseDTO>> avaliacoesPorIdEvento(UUID eventoId) {
+        List<AvaliacoesEventos> avaliacoes = avaliacoesRepository.findAvaliacoesEventosByEventoId(eventoId);
+        List<AvaliacaoResponseDTO> listaDto = converterLista(avaliacoes);
+        return ResponseEntity.ok(listaDto);
+    }
+
+    public ResponseEntity<List<AvaliacaoResponseDTO>> avaliacoesDoUsuarioDeUmEvento(Authentication authentication,UUID eventoId) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         findEventoOrThrow(eventoId);
         List<AvaliacoesEventos> avaliacoes = avaliacoesRepository.avaliacoesDoClientPorEvento(clientId, eventoId);
-        return ResponseEntity.ok(avaliacoesEventosMapper.toDTOList(avaliacoes));
+        List<AvaliacaoResponseDTO> listaDto = converterLista(avaliacoes);
+        return ResponseEntity.ok(listaDto);
     }
 
-    public ResponseEntity<List<AvaliacaoEventosDTO>> avaliacoesPorUser(Authentication authentication) {
-        return ResponseEntity.ok(avaliacoesEventosMapper.
-                toDTOList(avaliacoesRepository.findAvaliacoesEventosByClientUserEmail(authentication.getName())));
+    public ResponseEntity<List<AvaliacaoResponseDTO>> avaliacoesPorUser(Authentication authentication) {
+        List<AvaliacoesEventos> avaliacoesEventos = avaliacoesRepository
+                .findAvaliacoesEventosByClientUserEmail(authentication.getName());
+        List<AvaliacaoResponseDTO> listaDto = converterLista(avaliacoesEventos);
+        return ResponseEntity.ok(listaDto);
     }
 
-    public ResponseEntity<AvaliacaoEventosDTO> save(Authentication authentication, AvaliacaoEventosDTO avaliacaoDTO) {
+    public ResponseEntity<AvaliacaoResponseDTO> save(Authentication authentication, @Valid AvaliacaoRequestDTO avaliacaoDTO) {
 
-        findEventoOrThrow(avaliacaoDTO.getEventoId());
-        AvaliacoesEventos avaliacaoSalva = avaliacoesEventosMapper.toEntity(avaliacaoDTO);
-        avaliacaoSalva.setClientUser(userRepository.findByEmail(authentication.getName()));
+        Eventos eventos = findEventoOrThrow(avaliacaoDTO.getEventoId());
+        UUID clienteId = userRepository.findIdByEmail(authentication.getName());
+        ClientUser clientUser = findClientUserOrThrow(clienteId);
+        AvaliacoesEventos avaliacao = new AvaliacoesEventos();
+        avaliacao.setEvento(eventos);
+        avaliacao.setClientUser(clientUser);
 
-        AvaliacoesEventos saved = avaliacoesRepository.save(avaliacaoSalva);
-        return ResponseEntity.status(HttpStatus.CREATED).body(avaliacoesEventosMapper.toDTO(saved));
+        avaliacao.setComentario(avaliacaoDTO.getComentario());
+        avaliacao.setHoraAvaliacao(LocalDateTime.now());
+        avaliacao.setNota(avaliacaoDTO.getNota());
+
+
+        AvaliacoesEventos saved = avaliacoesRepository.save(avaliacao);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new AvaliacaoResponseDTO(saved));
     }
 
-    public ResponseEntity<AvaliacaoEventosDTO> update(Authentication authentication,AvaliacaoEventosDTO avaliacaoDTO) {
+    public ResponseEntity<AvaliacaoResponseDTO> update(Authentication authentication, @Valid AvaliacaoRequestDTO avaliacaoDTO) {
 
         AvaliacoesEventos avaliacao = findAvaliacaoOrThrow(avaliacaoDTO.getId());
         UUID clientUserId = userRepository.findIdByEmail(authentication.getName());
@@ -87,10 +108,10 @@ public class AvaliacoesEventosService {
         avaliacao.setHoraAvaliacao(LocalDateTime.now());
 
         return ResponseEntity
-                .status(HttpStatus.OK).body(avaliacoesEventosMapper.toDTO(avaliacoesRepository.save(avaliacao)));
+                .status(HttpStatus.OK).body(new AvaliacaoResponseDTO(avaliacao));
     }
 
-    public ResponseEntity<Void> deleteById(Authentication authentication , Long id) {
+    public ResponseEntity<Void> deleteById(Authentication authentication , UUID id) {
             AvaliacoesEventos avaliacoesEventos = findAvaliacaoOrThrow(id);
             UUID clientUserId = userRepository.findIdByEmail(authentication.getName());
             if (!clientUserId.equals(avaliacoesEventos.getClientUser().getId())) {
@@ -98,5 +119,9 @@ public class AvaliacoesEventosService {
             }
             avaliacoesRepository.deleteById(id);
             return ResponseEntity.noContent().build();
+    }
+
+    private List<AvaliacaoResponseDTO> converterLista(List<AvaliacoesEventos> avaliacoes) {
+        return avaliacoes.stream().map(AvaliacaoResponseDTO::new).toList();
     }
 }

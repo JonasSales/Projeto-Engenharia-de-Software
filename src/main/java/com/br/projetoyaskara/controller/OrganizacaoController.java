@@ -1,7 +1,9 @@
 package com.br.projetoyaskara.controller;
 
 
-import com.br.projetoyaskara.dto.OrganizacaoDTO;
+import com.br.projetoyaskara.dto.request.OrganizacaoCreateRequestDTO;
+import com.br.projetoyaskara.dto.request.OrganizacaoUpdateRequestDTO;
+import com.br.projetoyaskara.dto.response.OrganizacaoResponseDTO;
 import com.br.projetoyaskara.service.OrganizacaoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -24,15 +26,15 @@ public class OrganizacaoController {
 
     @PreAuthorize("hasAnyAuthority('organization::create')")
     @PostMapping()
-    ResponseEntity<OrganizacaoDTO> registerOrganizacao(
-            Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) {
+    ResponseEntity<OrganizacaoResponseDTO> registerOrganizacao(
+            Authentication authentication, @Valid @RequestBody OrganizacaoCreateRequestDTO organizacaoDTO) {
         return organizacaoService.registrarOrganizacao(authentication,organizacaoDTO);
     }
 
     @PreAuthorize("hasAnyAuthority('organization::put')")
     @PutMapping()
-    ResponseEntity<OrganizacaoDTO> updateOrganizacao(
-            Authentication authentication, @Valid @RequestBody OrganizacaoDTO organizacaoDTO) {
+    ResponseEntity<OrganizacaoResponseDTO> updateOrganizacao(
+            Authentication authentication, @Valid @RequestBody OrganizacaoUpdateRequestDTO organizacaoDTO) {
         return organizacaoService.updateOrganizacao(authentication, organizacaoDTO);
     }
 
@@ -43,24 +45,24 @@ public class OrganizacaoController {
     }
 
     @GetMapping()
-    ResponseEntity<List<OrganizacaoDTO>> getAllOrganizacao() {
+    ResponseEntity<List<OrganizacaoResponseDTO>> getAllOrganizacao() {
         return organizacaoService.getAllOrganizacoes();
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<List<OrganizacaoDTO>> getOrganizacaoByName(@PathVariable String name) {
+    public ResponseEntity<List<OrganizacaoResponseDTO>> getOrganizacaoByName(@PathVariable String name) {
         return organizacaoService.getOrganizacaoByName(name);
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrganizacaoDTO> getOrganizacaoById(@PathVariable UUID id) {
+    public ResponseEntity<OrganizacaoResponseDTO> getOrganizacaoById(@PathVariable UUID id) {
         return organizacaoService.getOrganizacaoById(id);
     }
 
     @PreAuthorize("hasAnyAuthority('organization::read')")
     @GetMapping("/organizations")
-    public ResponseEntity<List<OrganizacaoDTO>> findAllOrganizacaoByProprietario(Authentication authentication) {
+    public ResponseEntity<List<OrganizacaoResponseDTO>> findAllOrganizacaoByProprietario(Authentication authentication) {
         return organizacaoService.getOrganizacoesByIdProprietario(authentication);
     }
 

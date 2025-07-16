@@ -21,5 +21,5 @@ public interface OrganizacaoRepository extends JpaRepository<Organizacao, UUID> 
     Organizacao findOrganizacaoByEnderecoId(long id);
 
     @Query("SELECT o.id FROM Organizacao o WHERE o.id = :idEvento")
-    UUID findOrganizacaoByEventosId(@Param("idEvento") long idEvento);
+    UUID findOrganizacaoByEventosId(@Param("idEvento") UUID idEvento);
 }

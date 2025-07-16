@@ -1,8 +1,9 @@
 package com.br.projetoyaskara.service;
 
-import com.br.projetoyaskara.dto.EventosDTO;
+import com.br.projetoyaskara.dto.request.EventoCreateRequestDTO;
+import com.br.projetoyaskara.dto.request.EventoUpdateRequestDTO;
+import com.br.projetoyaskara.dto.response.EventoResponseDTO;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
-import com.br.projetoyaskara.mapper.EventosMapper;
 import com.br.projetoyaskara.model.Eventos;
 import com.br.projetoyaskara.model.Organizacao;
 import com.br.projetoyaskara.repository.EventosRepository;
@@ -19,23 +20,20 @@ import java.util.UUID;
 @Service
 public class EventosService {
 
-    private final EventosMapper eventosMapper;
     private final EventosRepository eventosRepository;
     private final OrganizacaoRepository organizacaoRepository;
     private final UserRepository userRepository;
 
     public EventosService(
-            EventosMapper eventosMapper,
             EventosRepository eventosRepository,
             OrganizacaoRepository organizacaoRepository,
             UserRepository userRepository) {
-        this.eventosMapper = eventosMapper;
         this.eventosRepository = eventosRepository;
         this.organizacaoRepository = organizacaoRepository;
         this.userRepository = userRepository;
     }
 
-    private Eventos findEventoOrThrow(Long eventoId) {
+    private Eventos findEventoOrThrow(UUID eventoId) {
         return eventosRepository
                 .findById(eventoId).orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado."));}
 
@@ -44,7 +42,7 @@ public class EventosService {
                 .findById(organizacaoId).orElseThrow(() -> new ResourceNotFoundException("Organizaca não encontrada"));
     }
 
-    public ResponseEntity<EventosDTO> cadastrarEvento(Authentication authentication,EventosDTO eventosDTO) {
+    public ResponseEntity<EventoResponseDTO> cadastrarEvento(Authentication authentication, EventoCreateRequestDTO eventosDTO) {
             Organizacao organizacao = findOrganizacaoOrThrow(eventosDTO.getOrganizacaoId());
             UUID userId = userRepository.findIdByEmail(authentication.getName());
 
@@ -52,17 +50,23 @@ public class EventosService {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
-            Eventos evento = eventosMapper.toEntity(eventosDTO);
+            Eventos evento = new Eventos();
+
+            evento.setName(eventosDTO.getName());
             evento.setOrganizacao(organizacao);
+            evento.setDescricao(eventosDTO.getDescricao());
+            evento.setDataInicio(eventosDTO.getDataInicio());
+            evento.setDataFim(eventosDTO.getDataFim());
+
             Eventos eventoSalvo = eventosRepository.save(evento);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(eventosMapper.toDTO(eventoSalvo));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new EventoResponseDTO(eventoSalvo));
     }
 
 
-    public ResponseEntity<EventosDTO> atualizarEvento(Authentication authentication, EventosDTO eventosDTO) {
+    public ResponseEntity<EventoResponseDTO> atualizarEvento(Authentication authentication, EventoUpdateRequestDTO eventosDTO) {
             Eventos eventoAtualizado = findEventoOrThrow(eventosDTO.getId());
-            Organizacao organizacao = findOrganizacaoOrThrow(eventosDTO.getOrganizacaoId());
+            Organizacao organizacao = findOrganizacaoOrThrow(eventoAtualizado.getOrganizacao().getId());
             UUID userId = userRepository.findIdByEmail(authentication.getName());
 
             if (!organizacao.getProprietario().getId().equals(userId)) {
@@ -74,12 +78,11 @@ public class EventosService {
             eventoAtualizado.setDataInicio(eventosDTO.getDataInicio());
             eventoAtualizado.setDataFim(eventosDTO.getDataFim());
             eventoAtualizado.setFaixaEtaria(eventosDTO.getFaixaEtaria());
-            eventoAtualizado.setStatus(eventosDTO.getStatus());
             return ResponseEntity
-                    .status(HttpStatus.OK).body(eventosMapper.toDTO(eventosRepository.save(eventoAtualizado)));
+                    .status(HttpStatus.OK).body(new EventoResponseDTO(eventoAtualizado));
     }
 
-    public ResponseEntity<Void> deletarEvento(Authentication authentication,long id) {
+    public ResponseEntity<Void> deletarEvento(Authentication authentication,UUID id) {
         Eventos evento = findEventoOrThrow(id);
         Organizacao organizacao = findOrganizacaoOrThrow(evento.getOrganizacao().getId());
         UUID userId = userRepository.findIdByEmail(authentication.getName());
@@ -92,39 +95,52 @@ public class EventosService {
         return ResponseEntity.noContent().build();
     }
 
-    public ResponseEntity<List<EventosDTO>> listarEventos() {
-        return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventosRepository.findAll()));
+
+    public ResponseEntity<List<EventoResponseDTO>> listarEventos() {
+        List<Eventos> listaDeEventos = eventosRepository.findAll();
+        List<EventoResponseDTO> listaDto = converterLista(listaDeEventos);
+        return ResponseEntity.status(HttpStatus.OK).body(listaDto);
     }
 
-    public ResponseEntity<EventosDTO> buscarEventoPorId(long id) {
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(findEventoOrThrow(id)));
+    public ResponseEntity<EventoResponseDTO> buscarEventoPorId(UUID id) {
+            return ResponseEntity.status(HttpStatus.OK).body(new EventoResponseDTO(findEventoOrThrow(id)));
     }
 
-    public ResponseEntity<List<EventosDTO>> buscarEventosPorNomeDaOrganizacao(String nomeDaOrganizacao) {
-            List<Eventos> eventos = eventosRepository.findAllByOrganizacao_Name(nomeDaOrganizacao);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
+    public ResponseEntity<List<EventoResponseDTO>> buscarEventosPorNomeDaOrganizacao(String nomeDaOrganizacao) {
+        List<Eventos> listaDeEventos = eventosRepository.findAllByOrganizacao_Name(nomeDaOrganizacao);
+        List<EventoResponseDTO> listaDto = converterLista(listaDeEventos);
+        return ResponseEntity.status(HttpStatus.OK).body(listaDto);
     }
 
-    public ResponseEntity<?> buscarEventosPorDescricao(String descricao) {
-            List<Eventos> eventos = eventosRepository.findAllByDescricaoContaining(descricao);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
+    public ResponseEntity<List<EventoResponseDTO>> buscarEventosPorDescricao(String descricao) {
+            List<Eventos> listaDeEventos = eventosRepository.findAllByDescricaoContaining(descricao);
+            List<EventoResponseDTO> listaDto = converterLista(listaDeEventos);
+            return ResponseEntity.status(HttpStatus.OK).body(listaDto);
     }
 
-    public ResponseEntity<List<EventosDTO>> buscarEventosPorOrganizacaoId(UUID organizacaoId) {
-        findOrganizacaoOrThrow(organizacaoId);
-        List<Eventos> eventos = eventosRepository.findAllByOrganizacao_Id(organizacaoId);
-        return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
+    public ResponseEntity<List<EventoResponseDTO>> buscarEventosPorOrganizacaoId(UUID organizacaoId) {
+        List<Eventos> listaDeEventos = eventosRepository.findAllByOrganizacao_Id(organizacaoId);
+        List<EventoResponseDTO> listaDto = converterLista(listaDeEventos);
+        return ResponseEntity.status(HttpStatus.OK).body(listaDto);
     }
 
-    public ResponseEntity<List<EventosDTO>> buscarEventosPorFaixaEtaria(String faixaEtaria) {
+    public ResponseEntity<List<EventoResponseDTO>> buscarEventosPorFaixaEtaria(String faixaEtaria) {
             Eventos.FaixaEtaria faixa = Eventos.FaixaEtaria.valueOf(faixaEtaria.toUpperCase());
             List<Eventos> eventos = eventosRepository.findAllByFaixaEtaria(faixa);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
+            List<EventoResponseDTO> listaDto = converterLista(eventos);
+            return ResponseEntity.status(HttpStatus.OK).body(listaDto);
     }
 
-    public ResponseEntity<List<EventosDTO>> buscarEventosPorStatus(String status) {
+    public ResponseEntity<List<EventoResponseDTO>> buscarEventosPorStatus(String status) {
             Eventos.Status statusEvento = Eventos.Status.valueOf(status.toUpperCase());
             List<Eventos> eventos = eventosRepository.findAllByStatus(statusEvento);
-            return ResponseEntity.status(HttpStatus.OK).body(eventosMapper.toDTO(eventos));
+            List<EventoResponseDTO> listaDto = converterLista(eventos);
+            return ResponseEntity.status(HttpStatus.OK).body(listaDto);
+    }
+
+    private List<EventoResponseDTO> converterLista(List<Eventos> eventos){
+        return eventos.stream()
+                .map(EventoResponseDTO::new)
+                .toList();
     }
 }

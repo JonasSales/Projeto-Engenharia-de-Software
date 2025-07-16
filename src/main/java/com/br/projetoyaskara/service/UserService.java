@@ -1,16 +1,18 @@
 package com.br.projetoyaskara.service;
 
-import com.br.projetoyaskara.dto.ClientUserDTO;
+import com.br.projetoyaskara.dto.request.UserCreateRequestDTO;
+import com.br.projetoyaskara.dto.request.UserUpdateRequestDTO;
+import com.br.projetoyaskara.dto.response.UserResponseDTO;
 import com.br.projetoyaskara.exception.BadRequestException;
 import com.br.projetoyaskara.exception.ConflictException;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
-import com.br.projetoyaskara.mapper.ClientUserMapper;
 import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.model.clientuser.Role;
 import com.br.projetoyaskara.repository.UserRepository;
 import com.br.projetoyaskara.util.GenerateRandonString;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -26,17 +28,14 @@ import java.util.UUID;
 @Service
 public class UserService {
 
-    private final ClientUserMapper clientUserMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailSender;
 
-    public UserService(ClientUserMapper clientUserMapper,
-                       UserRepository userRepository,
+    public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        MailService mailSender) {
 
-        this.clientUserMapper = clientUserMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
@@ -52,14 +51,17 @@ public class UserService {
         return clientUser;
     }
 
-    public ResponseEntity<ClientUserDTO> RegisterUser(ClientUser clientUser) throws MessagingException,
+    public ResponseEntity<UserResponseDTO> RegisterUser(@Valid UserCreateRequestDTO userCreateRequestDTO) throws MessagingException,
             UnsupportedEncodingException {
 
-            if (clientUser.getPassword() == null || clientUser.getPassword().length() < 6) {
+            if (userCreateRequestDTO.getPassword() == null || userCreateRequestDTO.getPassword().length() < 6) {
                 throw new BadRequestException("A senha deve ter no mínimo 6 dígitos.");
             }
 
-            clientUser.setPassword(passwordEncoder.encode(clientUser.getPassword()));
+            ClientUser clientUser = new ClientUser();
+            clientUser.setEmail(userCreateRequestDTO.getEmail());
+            clientUser.setName(userCreateRequestDTO.getName());
+            clientUser.setPassword(passwordEncoder.encode(userCreateRequestDTO.getPassword()));
             clientUser.setRole(Role.USER);
             clientUser.setCreated(LocalDateTime.now());
             clientUser.setModified(LocalDateTime.now());
@@ -69,7 +71,7 @@ public class UserService {
             ClientUser savedUser = userRepository.save(clientUser);
             mailSender.sendVerificationEmail(savedUser);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(clientUserMapper.clientUserToClientUserDTO(savedUser));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new UserResponseDTO(savedUser));
     }
 
     @Transactional
@@ -79,20 +81,20 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.OK).body("Conta deletada com sucesso.");
     }
 
-    public ResponseEntity<ClientUserDTO> atualizarUser(Authentication authentication,ClientUserDTO clientUserDTO) {
+    public ResponseEntity<UserResponseDTO> atualizarUser(Authentication authentication, UserUpdateRequestDTO clientUserDTO) {
             ClientUser clientUserAtualizado = findClientUserByEmailOrThrow(authentication.getName());
 
             clientUserAtualizado.setName(clientUserDTO.getName());
             clientUserAtualizado.setEmail(clientUserDTO.getEmail());
             clientUserAtualizado.setModified(LocalDateTime.now());
             ClientUser updatedUser = userRepository.save(clientUserAtualizado);
-            return ResponseEntity.status(HttpStatus.OK).body(clientUserMapper.clientUserToClientUserDTO(updatedUser));
+            return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDTO(updatedUser));
 
     }
 
-    public ResponseEntity<ClientUserDTO> getProfile(Authentication authentication) {
+    public ResponseEntity<UserResponseDTO> getProfile(Authentication authentication) {
             ClientUser clientUser = findClientUserByEmailOrThrow(authentication.getName());
-            return ResponseEntity.ok(clientUserMapper.clientUserToClientUserDTO(clientUser));
+            return ResponseEntity.ok(new UserResponseDTO(clientUser));
     }
 
     public ResponseEntity<String> verifyUser(String verificationToken) throws ConflictException {

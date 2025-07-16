@@ -1,8 +1,6 @@
 package com.br.projetoyaskara.model.clientuser;
 
-import com.br.projetoyaskara.model.AvaliacoesEventos;
-import com.br.projetoyaskara.model.Endereco;
-import com.br.projetoyaskara.model.Organizacao;
+import com.br.projetoyaskara.model.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -56,6 +54,9 @@ public class ClientUser implements UserDetails {
     private boolean active;
 
     private String token;
+
+    @OneToMany(mappedBy = "clientUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Pedido> pedidos;
 
     @OneToMany(mappedBy = "clientUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AvaliacoesEventos> avaliacoes;

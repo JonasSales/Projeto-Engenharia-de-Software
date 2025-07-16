@@ -1,8 +1,8 @@
 package com.br.projetoyaskara.service;
 
-import com.br.projetoyaskara.dto.EnderecoDTO;
+import com.br.projetoyaskara.dto.request.EnderecoRequestDTO;
+import com.br.projetoyaskara.dto.response.EnderecoResponseDTO;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
-import com.br.projetoyaskara.mapper.EnderecoMapper;
 import com.br.projetoyaskara.model.Endereco;
 import com.br.projetoyaskara.model.Eventos;
 import com.br.projetoyaskara.model.Organizacao;
@@ -25,16 +25,14 @@ public class EnderecoService {
 
     private final EnderecoRepository enderecoRepository;
     private final UserRepository userRepository;
-    private final EnderecoMapper enderecoMapper;
     private final EventosRepository eventosRepository;
     private final OrganizacaoRepository organizacaoRepository;
 
     public EnderecoService(EnderecoRepository enderecoRepository, UserRepository userRepository,
-                           EnderecoMapper enderecoMapper, EventosRepository eventosRepository,
+                           EventosRepository eventosRepository,
                            OrganizacaoRepository organizacaoRepository) {
         this.enderecoRepository = enderecoRepository;
         this.userRepository = userRepository;
-        this.enderecoMapper = enderecoMapper;
         this.eventosRepository = eventosRepository;
         this.organizacaoRepository = organizacaoRepository;
     }
@@ -44,7 +42,7 @@ public class EnderecoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Endereco não encontrado"));
     }
 
-    private Eventos findEventosOrThrow(long id) {
+    private Eventos findEventosOrThrow(UUID id) {
         return eventosRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
     }
@@ -56,42 +54,47 @@ public class EnderecoService {
 
     // ===================== CLIENTE =====================
 
-    public ResponseEntity<EnderecoDTO> cadastrarEnderecoClient(Authentication authentication, EnderecoDTO enderecoDTO) {
+    public ResponseEntity<EnderecoResponseDTO> cadastrarEnderecoClient(Authentication authentication,
+                                                                       EnderecoRequestDTO enderecoDTO) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
 
         if (clientUser.getEndereco() != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
-        Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
+        Endereco endereco = new Endereco();
+        endereco.setLatitude(enderecoDTO.getLatitude());
+        endereco.setLongitude(enderecoDTO.getLongitude());
+        endereco.setBairro(enderecoDTO.getBairro());
+        endereco.setCep(enderecoDTO.getCep());
+        endereco.setCidade(enderecoDTO.getCidade());
+        endereco.setEstado(enderecoDTO.getEstado());
+        endereco.setComplemento(enderecoDTO.getComplemento());
         clientUser.setEndereco(endereco);
-        ClientUser atualizado = userRepository.save(clientUser);
 
-        return ResponseEntity.ok(enderecoMapper.toDto(atualizado.getEndereco()));
+        userRepository.save(clientUser);
+        Endereco enderecoAtualizado = enderecoRepository.save(endereco);
+
+        return ResponseEntity.ok(new EnderecoResponseDTO(enderecoAtualizado));
     }
 
-    public ResponseEntity<EnderecoDTO> atualizarEnderecoClient(Authentication authentication, EnderecoDTO enderecoDTO) {
+    public ResponseEntity<EnderecoResponseDTO> atualizarEnderecoClient(Authentication authentication,
+                                                                       EnderecoRequestDTO enderecoDTO) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
 
-        if (clientUser.getEndereco() == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if (clientUser.getEndereco() != null) {
+            Endereco enderecoDesatualizado = clientUser.getEndereco();
+            atualizarEndereco(enderecoDesatualizado, new Endereco(enderecoDTO));
+            enderecoRepository.save(enderecoDesatualizado);
+            return ResponseEntity.ok(new EnderecoResponseDTO(enderecoDesatualizado));
+        } else {
+            return cadastrarEnderecoClient(authentication, enderecoDTO);
         }
-
-        Endereco enderecoDesatualizado = findEnderecoOrThrow(clientUser.getEndereco().getId());
-        Endereco enderecoAtualizado = enderecoMapper.toEntity(enderecoDTO);
-        atualizarEndereco(enderecoDesatualizado, enderecoAtualizado);
-        enderecoRepository.save(enderecoDesatualizado);
-        return ResponseEntity.ok(enderecoMapper.toDto(enderecoDesatualizado));
     }
 
-    public ResponseEntity<EnderecoDTO> buscarEnderecoCLient(Authentication authentication) {
+    public ResponseEntity<EnderecoResponseDTO> buscarEnderecoCLient(Authentication authentication) {
         ClientUser clientUser = userRepository.findByEmail(authentication.getName());
-
-        if (clientUser.getEndereco() == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        return ResponseEntity.ok(enderecoMapper.toDto(findEnderecoOrThrow(clientUser.getEndereco().getId())));
+        return ResponseEntity.ok(new EnderecoResponseDTO(clientUser.getEndereco()));
     }
 
     public ResponseEntity<String> deletarEnderecoClient(Authentication authentication) {
@@ -110,7 +113,8 @@ public class EnderecoService {
 
     // ===================== EVENTO =====================
 
-    public ResponseEntity<EnderecoDTO> cadastrarEnderecoEvento(Authentication authentication, EnderecoDTO enderecoDTO, long idEvento) {
+    public ResponseEntity<EnderecoResponseDTO> cadastrarEnderecoEvento(Authentication authentication,
+                                                                       EnderecoRequestDTO enderecoDTO, UUID idEvento) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         UUID organizacaoId = organizacaoRepository.findOrganizacaoByEventosId(idEvento);
 
@@ -124,14 +128,15 @@ public class EnderecoService {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
-        Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
+        Endereco endereco = new Endereco(enderecoDTO);
         evento.setEndereco(endereco);
-        eventosRepository.save(evento);
+        Eventos eventosSalvo = eventosRepository.save(evento);
 
-        return ResponseEntity.ok(enderecoMapper.toDto(endereco));
+        return ResponseEntity.ok(new EnderecoResponseDTO(eventosSalvo.getEndereco()));
     }
 
-    public ResponseEntity<EnderecoDTO> atualizarEnderecoEvento(Authentication authentication, long idEvento, EnderecoDTO enderecoDTO) {
+    public ResponseEntity<EnderecoResponseDTO> atualizarEnderecoEvento(Authentication authentication, UUID idEvento,
+                                                                       EnderecoRequestDTO enderecoDTO) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         Eventos evento = findEventosOrThrow(idEvento);
         UUID organizacaoId = organizacaoRepository.findOrganizacaoByEventosId(idEvento);
@@ -145,14 +150,14 @@ public class EnderecoService {
         }
 
         Endereco enderecoDesatualizado = findEnderecoOrThrow(evento.getEndereco().getId());
-        Endereco enderecoAtualizado = enderecoMapper.toEntity(enderecoDTO);
+        Endereco enderecoAtualizado = new Endereco(enderecoDTO);
         atualizarEndereco(enderecoDesatualizado, enderecoAtualizado);
         enderecoRepository.save(enderecoDesatualizado);
 
-        return ResponseEntity.ok(enderecoMapper.toDto(enderecoDesatualizado));
+        return ResponseEntity.ok(new EnderecoResponseDTO(enderecoDesatualizado));
     }
 
-    public ResponseEntity<String> deletarEnderecoEvento(Authentication authentication, long idEvento) {
+    public ResponseEntity<String> deletarEnderecoEvento(Authentication authentication, UUID idEvento) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         UUID organizacaoId = organizacaoRepository.findOrganizacaoByEventosId(idEvento);
 
@@ -174,7 +179,7 @@ public class EnderecoService {
         return ResponseEntity.ok("Endereço do evento deletado");
     }
 
-    public ResponseEntity<EnderecoDTO> buscarEnderecoEvento(Authentication authentication, long idEvento) {
+    public ResponseEntity<EnderecoResponseDTO> buscarEnderecoEvento(Authentication authentication, UUID idEvento) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         UUID organizacaoId = organizacaoRepository.findOrganizacaoByEventosId(idEvento);
 
@@ -188,12 +193,13 @@ public class EnderecoService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok(enderecoMapper.toDto(evento.getEndereco()));
+        return ResponseEntity.ok(new EnderecoResponseDTO(evento.getEndereco()));
     }
 
     // ===================== ORGANIZAÇÃO =====================
 
-    public ResponseEntity<EnderecoDTO> cadastrarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao, EnderecoDTO enderecoDTO) {
+    public ResponseEntity<EnderecoResponseDTO> cadastrarEnderecoOrganizacao(Authentication authentication,
+                                                                            UUID idOrganizacao, EnderecoRequestDTO enderecoDTO) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
 
@@ -205,15 +211,16 @@ public class EnderecoService {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
-        Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
+        Endereco endereco = new Endereco(enderecoDTO);
         enderecoRepository.save(endereco);
         organizacao.setEndereco(endereco);
         organizacaoRepository.save(organizacao);
 
-        return ResponseEntity.ok(enderecoMapper.toDto(endereco));
+        return ResponseEntity.ok(new EnderecoResponseDTO(endereco));
     }
 
-    public ResponseEntity<EnderecoDTO> atualizarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao, EnderecoDTO enderecoDTO) {
+    public ResponseEntity<EnderecoResponseDTO> atualizarEnderecoOrganizacao(Authentication authentication,
+                                                                            UUID idOrganizacao, EnderecoRequestDTO enderecoDTO) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
 
@@ -226,11 +233,11 @@ public class EnderecoService {
         }
 
         Endereco enderecoDesatualizado = findEnderecoOrThrow(organizacao.getEndereco().getId());
-        Endereco enderecoAtualizado = enderecoMapper.toEntity(enderecoDTO);
+        Endereco enderecoAtualizado = new Endereco(enderecoDTO);
         atualizarEndereco(enderecoDesatualizado, enderecoAtualizado);
         enderecoRepository.save(enderecoDesatualizado);
 
-        return ResponseEntity.ok(enderecoMapper.toDto(enderecoDesatualizado));
+        return ResponseEntity.ok(new EnderecoResponseDTO(enderecoDesatualizado));
     }
 
     public ResponseEntity<String> deletarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao) {
@@ -253,7 +260,7 @@ public class EnderecoService {
         return ResponseEntity.ok("Endereço da organização deletado com sucesso.");
     }
 
-    public ResponseEntity<EnderecoDTO> buscarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao) {
+    public ResponseEntity<EnderecoResponseDTO> buscarEnderecoOrganizacao(Authentication authentication, UUID idOrganizacao) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
         Organizacao organizacao = findOrganizacaoOrThrow(idOrganizacao);
 
@@ -265,6 +272,6 @@ public class EnderecoService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok(enderecoMapper.toDto(organizacao.getEndereco()));
+        return ResponseEntity.ok(new EnderecoResponseDTO(organizacao.getEndereco()));
     }
 }

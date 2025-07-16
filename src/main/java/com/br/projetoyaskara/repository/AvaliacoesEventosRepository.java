@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface AvaliacoesEventosRepository extends JpaRepository<AvaliacoesEventos, Long> {
+public interface AvaliacoesEventosRepository extends JpaRepository<AvaliacoesEventos, UUID> {
 
-    List<AvaliacoesEventos> findAvaliacoesEventosByEventoId(long evento);
+    List<AvaliacoesEventos> findAvaliacoesEventosByEventoId(UUID evento);
 
     @Query("select a from AvaliacoesEventos a where a.clientUser.email = :email")
     List<AvaliacoesEventos> findAvaliacoesEventosByClientUserEmail(@Param("email") String email);
 
     @Query("select a from AvaliacoesEventos a where (a.clientUser.id = :idClient and a.evento.id =: eventoId)")
-    List<AvaliacoesEventos> avaliacoesDoClientPorEvento(@Param("email") UUID idClient, @Param("eventoId") Long eventoId);
+    List<AvaliacoesEventos> avaliacoesDoClientPorEvento(@Param("email") UUID idClient, @Param("eventoId") UUID eventoId);
 
     @Query("SELECT AVG(a.nota) FROM AvaliacoesEventos a WHERE a.evento.id = :eventoId")
-    Double notaMediaEvento(@Param("eventoId") long eventoId);
+    Double notaMediaEvento(@Param("eventoId") UUID eventoId);
 
 }

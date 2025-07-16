@@ -1,8 +1,10 @@
 package com.br.projetoyaskara.service;
 
-import com.br.projetoyaskara.dto.OrganizacaoDTO;
+import com.br.projetoyaskara.dto.request.EnderecoRequestDTO;
+import com.br.projetoyaskara.dto.request.OrganizacaoCreateRequestDTO;
+import com.br.projetoyaskara.dto.request.OrganizacaoUpdateRequestDTO;
+import com.br.projetoyaskara.dto.response.OrganizacaoResponseDTO;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
-import com.br.projetoyaskara.mapper.OrganizacaoMapper;
 import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.model.Organizacao;
 import com.br.projetoyaskara.repository.OrganizacaoRepository;
@@ -14,18 +16,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OrganizacaoService {
 
-    private final OrganizacaoMapper organizacaoMapper;
     private final OrganizacaoRepository organizacaoRepository;
     private final UserRepository userRepository;
 
-    public OrganizacaoService(OrganizacaoMapper organizacaoMapper,
-                              OrganizacaoRepository organizacaoRepository,
+    public OrganizacaoService(OrganizacaoRepository organizacaoRepository,
                               UserRepository userRepository) {
-        this.organizacaoMapper = organizacaoMapper;
         this.organizacaoRepository = organizacaoRepository;
         this.userRepository = userRepository;
     }
@@ -40,8 +40,8 @@ public class OrganizacaoService {
                 .findById(id).orElseThrow(() -> new ResourceNotFoundException("Organização não encontrado"));
     }
 
-    public ResponseEntity<OrganizacaoDTO> registrarOrganizacao(
-            Authentication authentication, OrganizacaoDTO organizacaoDTO) {
+    public ResponseEntity<OrganizacaoResponseDTO> registrarOrganizacao(
+            Authentication authentication, OrganizacaoCreateRequestDTO organizacaoDTO) {
 
             UUID idUsuarioAutenticado = userRepository.findIdByEmail(authentication.getName());
 
@@ -54,13 +54,15 @@ public class OrganizacaoService {
             novaOrganizacao.setDescription(organizacaoDTO.getDescription());
             novaOrganizacao.setCnpj(organizacaoDTO.getCnpj());
 
-            Organizacao salva = organizacaoRepository.save(novaOrganizacao);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(organizacaoMapper.toDTO(salva));
+
+            Organizacao organizacaoSalva = organizacaoRepository.save(novaOrganizacao);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(new OrganizacaoResponseDTO(organizacaoSalva));
     }
 
 
-    public ResponseEntity<OrganizacaoDTO> updateOrganizacao(Authentication authentication, OrganizacaoDTO organizacaoDTO){
+    public ResponseEntity<OrganizacaoResponseDTO> updateOrganizacao(Authentication authentication, OrganizacaoUpdateRequestDTO organizacaoDTO){
             UUID idProprietario = userRepository.findIdByEmail(authentication.getName());
             Organizacao organizacaoExistente = findOrganizacaoOrThrow(organizacaoDTO.getId());
 
@@ -74,7 +76,7 @@ public class OrganizacaoService {
 
             Organizacao organizacaoSalva = organizacaoRepository.save(organizacaoExistente);
 
-            return ResponseEntity.ok(organizacaoMapper.toDTO(organizacaoSalva));
+            return ResponseEntity.ok(new OrganizacaoResponseDTO(organizacaoSalva));
 
     }
 
@@ -90,26 +92,31 @@ public class OrganizacaoService {
             return ResponseEntity.noContent().build();
     }
 
-    public ResponseEntity<List<OrganizacaoDTO>> getAllOrganizacoes() {
+    public ResponseEntity<List<OrganizacaoResponseDTO>> getAllOrganizacoes() {
             List<Organizacao> organizacoes = organizacaoRepository.findAll();
-            return ResponseEntity.status(HttpStatus.OK).body(organizacaoMapper.toDTO(organizacoes));
+            return ResponseEntity.status(HttpStatus.OK).body(converterLista(organizacoes));
     }
 
-    public ResponseEntity<OrganizacaoDTO> getOrganizacaoById(UUID id) {
+    public ResponseEntity<OrganizacaoResponseDTO> getOrganizacaoById(UUID id) {
             Organizacao organizacao = findOrganizacaoOrThrow(id);
-            return ResponseEntity.status(HttpStatus.OK).body(organizacaoMapper.toDTO(organizacao));
+            return ResponseEntity.status(HttpStatus.OK).body(new OrganizacaoResponseDTO(organizacao));
     }
 
-    public ResponseEntity<List<OrganizacaoDTO>> getOrganizacaoByName(String name) {
+    public ResponseEntity<List<OrganizacaoResponseDTO>> getOrganizacaoByName(String name) {
             List<Organizacao> organizacoes = organizacaoRepository.findAllByNameContaining(name);
-            return ResponseEntity.ok(organizacaoMapper.toDTO(organizacoes));
+            return ResponseEntity.ok(converterLista(organizacoes));
     }
 
-    public ResponseEntity<List<OrganizacaoDTO>> getOrganizacoesByIdProprietario(Authentication authentication) {
+    public ResponseEntity<List<OrganizacaoResponseDTO>> getOrganizacoesByIdProprietario(Authentication authentication) {
         UUID idProprietario = userRepository.findIdByEmail(authentication.getName());
         List<Organizacao> organizacoes = organizacaoRepository.findAllOrganizationByIdProprietario(idProprietario);
-        return  ResponseEntity.ok(organizacaoMapper.toDTO(organizacoes));
 
+        return  ResponseEntity.ok(converterLista(organizacoes));
+
+    }
+
+    private List<OrganizacaoResponseDTO> converterLista(List<Organizacao> organizacoes) {
+        return organizacoes.stream().map(OrganizacaoResponseDTO::new).collect(Collectors.toList());
     }
 
 }

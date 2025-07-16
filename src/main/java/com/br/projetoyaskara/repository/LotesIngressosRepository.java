@@ -7,11 +7,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface LotesIngressosRepository extends JpaRepository<LotesIngresso, Long> {
+public interface LotesIngressosRepository extends JpaRepository<LotesIngresso, UUID> {
 
-    List<LotesIngresso> findLotesIngressoByEventoId(Long eventoId);
+    List<LotesIngresso> findLotesIngressoByEventoId(UUID eventoId);
 
     @Query("select e from LotesIngresso e where ((e.valor >= :primeiraFaixa) and (e.valor <= :segundaFaixa)) ")
     List<LotesIngresso> findLotesIngressosPorFaixaDePreco(@Param("primeiraFaixa") int primeiraFaixa,

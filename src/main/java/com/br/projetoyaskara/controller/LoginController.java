@@ -1,7 +1,7 @@
 package com.br.projetoyaskara.controller;
 
 
-import com.br.projetoyaskara.dto.AuthenticationRequest;
+import com.br.projetoyaskara.dto.request.AuthenticationRequest;
 import com.br.projetoyaskara.service.LoginService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

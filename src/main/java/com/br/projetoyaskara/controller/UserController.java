@@ -1,8 +1,10 @@
 package com.br.projetoyaskara.controller;
 
-import com.br.projetoyaskara.dto.ClientUserDTO;
+
+import com.br.projetoyaskara.dto.request.UserCreateRequestDTO;
+import com.br.projetoyaskara.dto.request.UserUpdateRequestDTO;
+import com.br.projetoyaskara.dto.response.UserResponseDTO;
 import com.br.projetoyaskara.exception.ConflictException;
-import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.service.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -25,12 +27,12 @@ public class UserController {
     }
 
     @GetMapping()
-    public ResponseEntity<ClientUserDTO> getUserProfile(Authentication authentication) {
+    public ResponseEntity<UserResponseDTO> getUserProfile(Authentication authentication) {
         return userService.getProfile(authentication);
     }
 
     @PostMapping()
-    public ResponseEntity<ClientUserDTO> register(@Valid @RequestBody ClientUser clientUser) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserCreateRequestDTO clientUser) throws MessagingException, UnsupportedEncodingException {
         return userService.RegisterUser(clientUser);
     }
 
@@ -40,7 +42,8 @@ public class UserController {
     }
 
     @PutMapping()
-    public ResponseEntity<ClientUserDTO> atualizarUser(Authentication authentication ,@Valid @RequestBody ClientUserDTO clientUserDTO) {
+    public ResponseEntity<UserResponseDTO> atualizarUser(Authentication authentication,
+                                                         @Valid @RequestBody UserUpdateRequestDTO clientUserDTO) {
         return userService.atualizarUser(authentication ,clientUserDTO);
     }
 

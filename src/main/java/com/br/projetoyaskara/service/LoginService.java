@@ -1,7 +1,7 @@
 package com.br.projetoyaskara.service;
 
-import com.br.projetoyaskara.dto.AuthenticationRequest;
-import com.br.projetoyaskara.dto.AuthenticationResponse;
+import com.br.projetoyaskara.dto.request.AuthenticationRequest;
+import com.br.projetoyaskara.dto.response.AuthenticationResponse;
 import com.br.projetoyaskara.model.clientuser.ClientUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
