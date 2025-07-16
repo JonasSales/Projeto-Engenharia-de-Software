@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +29,6 @@ public class Carrinho {
     @OneToMany(mappedBy = "carrinho", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemCarrinho> itensCarrinho;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal valorTotal;
+    private Integer valorTotal;
 
 }
