@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -22,8 +21,18 @@ public class PedidoResponseDTO {
     private List<ItemPedidoResponseDTO> itens;
     private TransacaoPagamentoResponseDTO transacao;
     private Pedido.StatusPedido status;
-    private BigDecimal valorTotal;
+    private Integer valorTotal;
     private LocalDateTime dataCriacao;
     private LocalDateTime dataAtualizacao;
 
+    public PedidoResponseDTO(Pedido pedidoSalvo) {
+        this.id = pedidoSalvo.getId();
+        this.clientUserId = pedidoSalvo.getClientUser().getId();
+        this.itens = pedidoSalvo.getItensPedido().stream().map(ItemPedidoResponseDTO::new).toList();
+        this.transacao = new TransacaoPagamentoResponseDTO(pedidoSalvo.getTransacaoPagamento());
+        this.status = pedidoSalvo.getStatus();
+        this.valorTotal = pedidoSalvo.getValorTotal();
+        this.dataCriacao = pedidoSalvo.getDataCriacao();
+        this.dataAtualizacao = pedidoSalvo.getDataAtualizacao();
+    }
 }
