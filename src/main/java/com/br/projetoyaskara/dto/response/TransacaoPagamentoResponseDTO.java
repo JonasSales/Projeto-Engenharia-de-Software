@@ -1,5 +1,6 @@
 package com.br.projetoyaskara.dto.response;
 
+import com.br.projetoyaskara.model.TransacaoPagamento;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,4 +24,14 @@ public class TransacaoPagamentoResponseDTO {
     private LocalDateTime dataDeCriacao;
     private LocalDateTime dataDePagamento;
 
+    public TransacaoPagamentoResponseDTO(TransacaoPagamento transacaoPagamento) {
+        this.id = transacaoPagamento.getId();
+        this.status = String.valueOf(transacaoPagamento.getStatus());
+        this.metodoPagamento = String.valueOf(transacaoPagamento.getMetodoPagamento());
+        this.valorTotal = transacaoPagamento.getValorTotal();
+        this.qrCodePix = transacaoPagamento.getQrCodePix();
+        this.linkPagamento = transacaoPagamento.getLinkPagamento();
+        this.dataDeCriacao = transacaoPagamento.getDataDeCriacao();
+        this.dataDePagamento = transacaoPagamento.getDataDePagamento();
+    }
 }
