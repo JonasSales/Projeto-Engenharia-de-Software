@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface CarrinhoRepository extends JpaRepository<Carrinho, Integer> {
+public interface CarrinhoRepository extends JpaRepository<Carrinho, UUID> {
 
     Carrinho findByClientUserId(UUID idUsuario);
 }
