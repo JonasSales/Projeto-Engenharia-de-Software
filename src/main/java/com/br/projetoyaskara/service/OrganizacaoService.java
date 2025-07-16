@@ -1,6 +1,5 @@
 package com.br.projetoyaskara.service;
 
-import com.br.projetoyaskara.dto.request.EnderecoRequestDTO;
 import com.br.projetoyaskara.dto.request.OrganizacaoCreateRequestDTO;
 import com.br.projetoyaskara.dto.request.OrganizacaoUpdateRequestDTO;
 import com.br.projetoyaskara.dto.response.OrganizacaoResponseDTO;
