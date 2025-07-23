@@ -78,4 +78,9 @@ public class EventosController {
     public ResponseEntity<List<EventoResponseDTO>> buscarEventosPorStatus(@PathVariable String status) {
         return eventosService.buscarEventosPorStatus(status);
     }
+
+    @GetMapping("/distancia")
+    public ResponseEntity<List<EventoResponseDTO>> buscarEventosPorDistancia(Authentication authentication) {
+        return eventosService.buscarEventosPorDistancia(authentication);
+    }
 }

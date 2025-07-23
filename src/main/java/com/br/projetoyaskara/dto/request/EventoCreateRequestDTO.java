@@ -35,6 +35,9 @@ public class EventoCreateRequestDTO {
     @NotNull(message = "Faixa etária é obrigatória.")
     private Eventos.FaixaEtaria faixaEtaria;
 
+    @NotNull(message = "Status é obrigatário")
+    private Eventos.Status status;
+
     @NotNull(message = "Organização é obrigatória.")
     private UUID organizacaoId;
 

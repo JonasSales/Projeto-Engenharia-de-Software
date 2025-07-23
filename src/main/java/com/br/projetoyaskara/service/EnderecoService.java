@@ -116,13 +116,15 @@ public class EnderecoService {
     public ResponseEntity<EnderecoResponseDTO> cadastrarEnderecoEvento(Authentication authentication,
                                                                        EnderecoRequestDTO enderecoDTO, UUID idEvento) {
         UUID clientId = userRepository.findIdByEmail(authentication.getName());
-        UUID organizacaoId = organizacaoRepository.findOrganizacaoByEventosId(idEvento);
+        Eventos evento = findEventosOrThrow(idEvento);
 
-        if (!clientId.equals(organizacaoId)) {
+
+        System.out.println("Testando aqui");
+        if (!clientId.equals(evento.getOrganizacao().getProprietario().getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Eventos evento = findEventosOrThrow(idEvento);
+
 
         if (evento.getEndereco() != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();

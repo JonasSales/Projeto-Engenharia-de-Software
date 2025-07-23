@@ -6,16 +6,20 @@ import com.br.projetoyaskara.dto.response.EventoResponseDTO;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
 import com.br.projetoyaskara.model.Eventos;
 import com.br.projetoyaskara.model.Organizacao;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.repository.EventosRepository;
 import com.br.projetoyaskara.repository.OrganizacaoRepository;
 import com.br.projetoyaskara.repository.UserRepository;
+import com.br.projetoyaskara.util.Haversine;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class EventosService {
@@ -40,6 +44,11 @@ public class EventosService {
     private Organizacao findOrganizacaoOrThrow(UUID organizacaoId) {
         return organizacaoRepository
                 .findById(organizacaoId).orElseThrow(() -> new ResourceNotFoundException("Organizaca não encontrada"));
+    }
+
+    private ClientUser findClientUserOrThrow(UUID clientUserId) {
+        return userRepository
+                .findById(clientUserId).orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 
     public ResponseEntity<EventoResponseDTO> cadastrarEvento(Authentication authentication, EventoCreateRequestDTO eventosDTO) {
@@ -138,9 +147,35 @@ public class EventosService {
             return ResponseEntity.status(HttpStatus.OK).body(listaDto);
     }
 
+    public ResponseEntity<List<EventoResponseDTO>> buscarEventosPorDistancia(Authentication authentication) {
+        UUID clientId = userRepository.findIdByEmail(authentication.getName());
+        ClientUser cliente = findClientUserOrThrow(clientId);
+
+        List<Eventos> eventos = eventosRepository.findAll();
+
+        return ResponseEntity.status(HttpStatus.OK).body(eventos.stream()
+                .map(evento -> {
+                    double distancia = Haversine.calcularDistancia(
+                            cliente.getEndereco().getLatitude(), cliente.getEndereco().getLongitude(),
+                            evento.getOrganizacao().getEndereco().getLatitude(), evento.getOrganizacao().getEndereco().getLongitude()
+                    );
+                    Haversine.calcularDistancia(cliente.getEndereco().getLatitude(), evento.getOrganizacao().getEndereco().getLatitude(),
+                            cliente.getEndereco().getLongitude(), evento.getOrganizacao().getEndereco().getLongitude());
+
+                    EventoResponseDTO dto = new EventoResponseDTO(evento);
+                    dto.setDistancia(distancia);
+                    return dto;
+                })
+                .sorted(Comparator.comparing(EventoResponseDTO::getDistancia))
+                .collect(Collectors.toList()));
+    }
+
     private List<EventoResponseDTO> converterLista(List<Eventos> eventos){
         return eventos.stream()
                 .map(EventoResponseDTO::new)
                 .toList();
     }
+
+
 }
+

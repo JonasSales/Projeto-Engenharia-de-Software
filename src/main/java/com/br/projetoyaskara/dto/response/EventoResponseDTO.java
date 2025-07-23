@@ -24,7 +24,7 @@ public class EventoResponseDTO {
         this.faixaEtaria = eventos.getFaixaEtaria();
         this.status = eventos.getStatus();
         this.endereco = eventos.getEndereco() != null ? new EnderecoResponseDTO(eventos.getEndereco()) : null;
-
+        this.organizacao = new OrganizacaoResponseDTO(eventos.getOrganizacao());
     }
 
     private UUID id;
@@ -36,5 +36,6 @@ public class EventoResponseDTO {
     private Eventos.Status status;
     private EnderecoResponseDTO endereco;
     private OrganizacaoResponseDTO organizacao;
+    private double distancia;
 
 }

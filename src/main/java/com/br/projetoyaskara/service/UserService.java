@@ -68,6 +68,8 @@ public class UserService {
             clientUser.setActive(false);
             clientUser.setToken(GenerateRandonString.generateRandomString());
 
+            System.out.println(clientUser.getToken());
+
             ClientUser savedUser = userRepository.save(clientUser);
             mailSender.sendVerificationEmail(savedUser);
 

@@ -40,6 +40,9 @@ public class EventoUpdateRequestDTO {
     @NotNull(message = "Faixa etária é obrigatória.")
     private Eventos.FaixaEtaria faixaEtaria;
 
+    @NotNull(message = "Status é obrigatário")
+    private Eventos.Status status;
+
     //@NotNull(message = "Endereço é obrigatório.")
     @Valid
     private EnderecoRequestDTO endereco;
