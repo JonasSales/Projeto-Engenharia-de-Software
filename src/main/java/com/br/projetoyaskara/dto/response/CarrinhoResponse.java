@@ -22,12 +22,20 @@ public class CarrinhoResponse {
 
     private List<ItemCarrinhoResponse> itens;
 
-    private Integer valorTotal;
+    private double valorTotal;
 
     public CarrinhoResponse(Carrinho carrinho) {
         this.id = carrinho.getId();
         this.clientUserId = carrinho.getClientUser().getId();
-        this.itens = carrinho.getItensCarrinho().stream().map(ItemCarrinhoResponse::new).toList();
-        this.valorTotal = carrinho.getValorTotal();
+        this.itens = carrinho.getItensCarrinho().stream()
+                .map(ItemCarrinhoResponse::new)
+                .toList();
+
+
+        this.valorTotal = carrinho.getItensCarrinho().stream()
+                .mapToDouble(item -> item.getQuantidade() * item.getLotesIngresso().getValor() / 100.0)
+                .sum();
     }
+
+
 }
