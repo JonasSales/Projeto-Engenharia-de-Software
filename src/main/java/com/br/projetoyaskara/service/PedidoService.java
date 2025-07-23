@@ -3,6 +3,7 @@ package com.br.projetoyaskara.service;
 import com.br.projetoyaskara.dto.response.PedidoResponseDTO;
 import com.br.projetoyaskara.model.*;
 import com.br.projetoyaskara.repository.CarrinhoRepository;
+import com.br.projetoyaskara.repository.ItemCarrinhoRepository;
 import com.br.projetoyaskara.repository.PedidoRepository;
 import com.br.projetoyaskara.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +21,16 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final CarrinhoRepository carrinhoRepository;
     private final UserRepository userRepository;
+    private final ItemCarrinhoRepository itemCarrinhoRepository;
 
     public PedidoService(PedidoRepository pedidoRepository,
                          CarrinhoRepository carrinhoRepository,
-                         UserRepository userRepository){
+                         UserRepository userRepository,
+                         ItemCarrinhoRepository itemCarrinhoRepository) {
         this.pedidoRepository = pedidoRepository;
         this.carrinhoRepository = carrinhoRepository;
         this.userRepository = userRepository;
+        this.itemCarrinhoRepository = itemCarrinhoRepository;
     }
 
     @Transactional
@@ -34,7 +38,7 @@ public class PedidoService {
         UUID idUser = userRepository.findIdByEmail(authentication.getName());
         Carrinho carrinho = carrinhoRepository.findByClientUserId(idUser);
 
-        if (carrinho.getItensCarrinho() == null || carrinho.getItensCarrinho().isEmpty()) {
+        if (carrinho == null || carrinho.getItensCarrinho() == null || carrinho.getItensCarrinho().isEmpty()) {
             throw new IllegalStateException("O carrinho está vazio.");
         }
 
@@ -60,13 +64,14 @@ public class PedidoService {
         transacao.setMetodoPagamento(metodoPagamento);
 
         novoPedido.setTransacaoPagamento(transacao);
-
         Pedido pedidoSalvo = pedidoRepository.save(novoPedido);
 
+        List<ItemCarrinho> itemsToDelete = new ArrayList<>(carrinho.getItensCarrinho());
         carrinho.getItensCarrinho().clear();
+        carrinho.setValorTotal(0);
+        itemCarrinhoRepository.deleteAllInBatch(itemsToDelete);
         carrinhoRepository.save(carrinho);
 
         return ResponseEntity.ok(new PedidoResponseDTO(pedidoSalvo));
     }
-
 }
