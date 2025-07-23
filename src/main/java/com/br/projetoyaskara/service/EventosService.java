@@ -159,9 +159,6 @@ public class EventosService {
                             cliente.getEndereco().getLatitude(), cliente.getEndereco().getLongitude(),
                             evento.getOrganizacao().getEndereco().getLatitude(), evento.getOrganizacao().getEndereco().getLongitude()
                     );
-                    Haversine.calcularDistancia(cliente.getEndereco().getLatitude(), evento.getOrganizacao().getEndereco().getLatitude(),
-                            cliente.getEndereco().getLongitude(), evento.getOrganizacao().getEndereco().getLongitude());
-
                     EventoResponseDTO dto = new EventoResponseDTO(evento);
                     dto.setDistancia(distancia);
                     return dto;
