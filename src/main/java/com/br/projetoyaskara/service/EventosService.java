@@ -4,6 +4,7 @@ import com.br.projetoyaskara.dto.request.EventoCreateRequestDTO;
 import com.br.projetoyaskara.dto.request.EventoUpdateRequestDTO;
 import com.br.projetoyaskara.dto.response.EventoResponseDTO;
 import com.br.projetoyaskara.exception.ResourceNotFoundException;
+import com.br.projetoyaskara.model.Endereco;
 import com.br.projetoyaskara.model.Eventos;
 import com.br.projetoyaskara.model.Organizacao;
 import com.br.projetoyaskara.model.clientuser.ClientUser;
@@ -68,6 +69,7 @@ public class EventosService {
             evento.setDataFim(eventosDTO.getDataFim());
             evento.setFaixaEtaria(eventosDTO.getFaixaEtaria());
             evento.setStatus(eventosDTO.getStatus());
+            evento.setEndereco(new Endereco(eventosDTO.getEndereco()));
             Eventos eventoSalvo = eventosRepository.save(evento);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(new EventoResponseDTO(eventoSalvo));
@@ -89,7 +91,7 @@ public class EventosService {
             eventoAtualizado.setDataFim(eventosDTO.getDataFim());
             eventoAtualizado.setStatus(eventosDTO.getStatus());
             eventoAtualizado.setFaixaEtaria(eventosDTO.getFaixaEtaria());
-
+            eventoAtualizado.setEndereco(new Endereco(eventosDTO.getEndereco()));
             eventosRepository.save(eventoAtualizado);
             return ResponseEntity
                     .status(HttpStatus.OK).body(new EventoResponseDTO(eventoAtualizado));
