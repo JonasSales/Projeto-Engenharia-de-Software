@@ -66,7 +66,8 @@ public class EventosService {
             evento.setDescricao(eventosDTO.getDescricao());
             evento.setDataInicio(eventosDTO.getDataInicio());
             evento.setDataFim(eventosDTO.getDataFim());
-
+            evento.setFaixaEtaria(eventosDTO.getFaixaEtaria());
+            evento.setStatus(eventosDTO.getStatus());
             Eventos eventoSalvo = eventosRepository.save(evento);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(new EventoResponseDTO(eventoSalvo));
@@ -86,6 +87,7 @@ public class EventosService {
             eventoAtualizado.setDescricao(eventosDTO.getDescricao());
             eventoAtualizado.setDataInicio(eventosDTO.getDataInicio());
             eventoAtualizado.setDataFim(eventosDTO.getDataFim());
+            eventoAtualizado.setStatus(eventosDTO.getStatus());
             eventoAtualizado.setFaixaEtaria(eventosDTO.getFaixaEtaria());
             return ResponseEntity
                     .status(HttpStatus.OK).body(new EventoResponseDTO(eventoAtualizado));
