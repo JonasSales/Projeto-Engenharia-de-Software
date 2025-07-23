@@ -89,6 +89,8 @@ public class EventosService {
             eventoAtualizado.setDataFim(eventosDTO.getDataFim());
             eventoAtualizado.setStatus(eventosDTO.getStatus());
             eventoAtualizado.setFaixaEtaria(eventosDTO.getFaixaEtaria());
+
+            eventosRepository.save(eventoAtualizado);
             return ResponseEntity
                     .status(HttpStatus.OK).body(new EventoResponseDTO(eventoAtualizado));
     }
