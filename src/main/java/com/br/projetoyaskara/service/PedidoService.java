@@ -2,6 +2,7 @@ package com.br.projetoyaskara.service;
 
 import com.br.projetoyaskara.dto.response.PedidoResponseDTO;
 import com.br.projetoyaskara.model.*;
+import com.br.projetoyaskara.model.clientuser.ClientUser;
 import com.br.projetoyaskara.repository.CarrinhoRepository;
 import com.br.projetoyaskara.repository.ItemCarrinhoRepository;
 import com.br.projetoyaskara.repository.PedidoRepository;
@@ -36,6 +37,10 @@ public class PedidoService {
     @Transactional
     public ResponseEntity<PedidoResponseDTO> criarPedidoDoCarrinho(Authentication authentication, TransacaoPagamento.MetodoPagamento metodoPagamento) {
         UUID idUser = userRepository.findIdByEmail(authentication.getName());
+
+        ClientUser clientUser = userRepository.findById(idUser)
+                .orElseThrow(() -> new IllegalStateException("Cliente não encontrado."));
+
         Carrinho carrinho = carrinhoRepository.findByClientUserId(idUser);
 
         if (carrinho == null || carrinho.getItensCarrinho() == null || carrinho.getItensCarrinho().isEmpty()) {
@@ -43,8 +48,12 @@ public class PedidoService {
         }
 
         Pedido novoPedido = new Pedido();
+
+        novoPedido.setClientUser(clientUser);
+
         List<ItemPedido> itensPedido = new ArrayList<>();
         int valorTotalCentavos = 0;
+
 
         for (ItemCarrinho itemCarrinho : carrinho.getItensCarrinho()) {
             int valorItem = itemCarrinho.getLotesIngresso().getValor();
